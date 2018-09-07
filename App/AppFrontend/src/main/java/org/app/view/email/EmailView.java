@@ -3,18 +3,16 @@ package org.app.view.email;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.app.controler.EmailService;
 import org.app.helper.I18n;
-import org.app.model.entity.Title;
 import org.app.view.email.inbox.InboxView;
 import org.app.view.email.settings.SettingsView;
-import org.app.view.masterdetail.views.TitleDetailView;
 
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 
@@ -25,6 +23,9 @@ public class EmailView extends VerticalLayout implements View {
 	@Inject
 	InboxView inboxView;
 
+	@Inject
+	EmailService service;
+	
 	private I18n i18n;
 	private VerticalLayout mainView;
 	private EmailTopMenu emailTopMenu;
@@ -48,7 +49,7 @@ public class EmailView extends VerticalLayout implements View {
 	void init() {
 		mainView = new VerticalLayout();
 		mainView.setMargin(false);
-		emailTopMenu = new EmailTopMenu();
+		emailTopMenu = new EmailTopMenu(service);
 		emailContentView = new HorizontalLayout();
 		emailContentView.setMargin(false);
 		emailContentView.setSizeFull();
@@ -91,7 +92,7 @@ public class EmailView extends VerticalLayout implements View {
 	}
 
 	private Button showOutboxView() {
-		outboxButton = new Button(i18n.EMAIL_OUTBOX, new Button.ClickListener() {
+		outboxButton = new Button(i18n.EMAIL_SENT, new Button.ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				emailContentRightBar.removeAllComponents();
@@ -135,7 +136,7 @@ public class EmailView extends VerticalLayout implements View {
 	}
 	
 	private Button showSettingsView() {
-		settingsButton = new Button(i18n.NAVI_SETTINGS, new Button.ClickListener() {
+		settingsButton = new Button(i18n.EMAIL_SETTINGS, new Button.ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				getUI().addWindow(new SettingsView());

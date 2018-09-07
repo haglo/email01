@@ -67,11 +67,11 @@ public class SendView extends Window {
 			email.setWithAttachment(true);
 			try {
 				smtp.send(email);
-				Notification.show(i18n.EMAIL_SEND_SUCCESS);
+				Notification.show("Send success");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				Notification.show(i18n.EMAIL_SEND_ERROR);
+				Notification.show("Send Error");
 			} finally {
 				getUI().getCurrent().removeWindow(this);
 			}

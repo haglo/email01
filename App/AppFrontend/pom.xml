@@ -161,6 +161,14 @@
 			<version>1.4.7</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-gmail</artifactId>
+			<version>v1-rev95-1.25.0</version>
+		</dependency>
+
+
 		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
 		<dependency>
 			<groupId>javax.activation</groupId>
@@ -173,6 +181,14 @@
 			<artifactId>vaadin-upload</artifactId>
 			<version>4.0.1</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.11</version>
+		</dependency>
+
 
 
 		<dependency>

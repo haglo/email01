@@ -5,6 +5,9 @@ import javax.inject.Inject;
 
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
+import org.app.view.email.inbox.parts.InboxMessage;
+import org.app.view.email.inbox.parts.InboxSubject;
+
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -13,18 +16,15 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @CDIView(I18n.INBOX_VIEW)
 public class InboxView extends VerticalLayout implements View {
-	
+
 	@Inject
 	EmailService service;
 
-	private I18n i18n;
 	private HorizontalSplitPanel mainContent;
-	private InboxOverView inboxOverView;
-	private InboxDetailView inboxDetailView;
-
+	private InboxSubject inboxOverView;
+	private InboxMessage inboxDetailView;
 
 	public InboxView() {
-		i18n = new I18n();
 		setMargin(false);
 		setSizeFull();
 
@@ -35,15 +35,13 @@ public class InboxView extends VerticalLayout implements View {
 		mainContent = new HorizontalSplitPanel();
 		mainContent.setSplitPosition(50, Unit.PERCENTAGE);
 		mainContent.setSizeFull();
-		
-		inboxOverView = new InboxOverView(service);
-		inboxDetailView = new InboxDetailView();
-		
+
+		inboxOverView = new InboxSubject(service);
+		inboxDetailView = new InboxMessage("");
+
 		mainContent.setFirstComponent(inboxOverView);
 		mainContent.setSecondComponent(inboxDetailView);
 		addComponent(mainContent);
 	}
-	
-	
 
 }

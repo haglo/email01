@@ -4,20 +4,10 @@ import java.io.Serializable;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
 
 import org.app.model.dao.PmailDAO;
-import org.app.model.dao.PersonDAO;
-import org.app.model.entity.Address;
-import org.app.model.entity.Person;
 
-/*
- * Managed Bean
- * MVC: Controler-Part
- * Repräsentiert den kpmpletten Lebenszyklus eines Personendatensatz &
- * Bietet zusätzliche Funktionalität für diesen Personendatensatz an
- */
+
 @RequestScoped
 public class EmailService implements Serializable {
 	

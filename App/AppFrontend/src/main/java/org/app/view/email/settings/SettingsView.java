@@ -20,7 +20,7 @@ public class SettingsView extends Window {
 		i18n = new I18n();
 		subContent = new VerticalLayout();
 		this.setWidth("80%");
-		this.setCaption(i18n.NAVI_SETTINGS);
+		this.setCaption(i18n.EMAIL_SETTINGS);
 		this.setContent(subContent);
 		this.center();
 		

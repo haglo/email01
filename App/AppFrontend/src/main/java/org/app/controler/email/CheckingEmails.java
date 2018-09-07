@@ -1,48 +1,37 @@
 package org.app.controler.email;
 
 import java.util.Properties;
-import java.util.TreeSet;
 
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-
 import org.app.controler.EmailService;
+import org.app.controler.email.MailServer.Mailprovider;
 import org.app.model.entity.Pmail;
-
-import java.util.*;
-import java.io.*;
+import org.app.helper.I18n;
 
 public class CheckingEmails {
-	
+
 	private Pmail pmail;
 	private Store store;
+	private MailServer mailServer;
 
-	
 	public void readEmails(EmailService service) {
+
+		mailServer = new MailServer();
+//		mailServer.init(Mailprovider.PRIVATE);
+		mailServer.init();
+
 		try {
-			Properties properties = new Properties();
 
-			String imapHost = "imap.gmail.com";
-			String username = "h.g.gloeckler@gmail.com";
-			String password = "1234:Atgfd";
+			Session emailSession = Session.getDefaultInstance(mailServer.getProperties());
+			Store store = emailSession.getStore("imap");
 
-			properties.put("mail.imap.user", username);
-			properties.put("mail.imap.host", imapHost);
-			properties.put("mail.imap.port", 993);
-			properties.put("mail.imap.ssl.enable", true);
-
-			Session emailSession = Session.getDefaultInstance(properties);
-			Store store = emailSession.getStore("imaps");
-
-			store.connect(imapHost, username, password);
+			store.connect(mailServer.getImapHost(), mailServer.getUsername(), mailServer.getPassword());
 			if (store.isConnected()) {
 				System.out.println("Connect to Imap: true");
 			}
@@ -58,8 +47,10 @@ public class CheckingEmails {
 			for (int i = 0, n = messages.length; i < n; i++) {
 				pmail = new Pmail();
 				Message message = messages[i];
-				pmail.setPsubject(message.getSubject());
-				service.getPmailDAO().update(pmail);
+				pmail.setPsubject(I18n.encodeToBase64(message.getSubject()));
+				pmail.setPfrom(I18n.encodeToBase64(message.getFrom()[0].toString()));
+				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
+				service.getPmailDAO().create(pmail);
 			}
 
 			// close the store and folder objects
@@ -74,7 +65,6 @@ public class CheckingEmails {
 			e.printStackTrace();
 		}
 	}
-
 
 //	public TreeSet<String> getEmailAddesses() throws MessagingException {
 //		// open the inbox folder
@@ -183,6 +173,77 @@ public class CheckingEmails {
 		}
 	}
 
+	public void check1(EmailService service) {
+
+		try {
+			Properties properties = new Properties();
+
+			String imapHost = "195.201.215.12";
+			String username = "hans-georg.gloeckler@gimtex.de";
+			String password = "1234:Atgfd";
+
+			properties.put("mail.imap.user", username);
+			properties.put("mail.imap.host", imapHost);
+			properties.put("mail.imap.port", 143);
+			properties.put("mail.imap.ssl.enable", false);
+
+			Session emailSession = Session.getDefaultInstance(properties);
+			Store store = emailSession.getStore("imaps");
+
+			store.connect(imapHost, username, password);
+			if (store.isConnected()) {
+				System.out.println("Connect to Imap: true");
+			}
+
+			// create the folder object and open it
+			Folder emailFolder = store.getFolder("INBOX");
+			emailFolder.open(Folder.READ_ONLY);
+
+			// retrieve the messages from the folder in an array and print it
+			Message[] messages = emailFolder.getMessages();
+			System.out.println("messages.length---" + messages.length);
+
+			for (int i = 0, n = messages.length; i < n; i++) {
+				Message message = messages[i];
+				System.out.println("---------------------------------");
+				System.out.println("-------New Email-----------------");
+				System.out.println("---------------------------------");
+				System.out.println("Email Number " + (i + 1));
+				System.out.println("Subject: " + message.getSubject());
+				System.out.println("From: " + message.getFrom()[0]);
+				System.out.println("Text: " + message.getContent().toString());
+
+				System.out.println("---------------------------------");
+				pmail = new Pmail();
+				pmail.setPsubject(I18n.encodeToBase64(message.getSubject()));
+				System.out.println("Subject von Pmail: " + pmail.getPsubject());
+
+				pmail.setPfrom(I18n.encodeToBase64(message.getFrom()[0].toString()));
+				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
+				service.getPmailDAO().create(pmail);
+
+			}
+
+//			for (int i = 0, n = messages.length; i < n; i++) {
+//				pmail = new Pmail();
+//				Message message = messages[i];
+//				pmail.setPsubject(I18n.encodeToBase64(message.getSubject()));
+//				pmail.setPfrom(I18n.encodeToBase64(message.getFrom()[0].toString()));
+//				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
+//				service.getPmailDAO().create(pmail);
+//			}
+			// close the store and folder objects
+			emailFolder.close(false);
+			store.close();
+
+		} catch (NoSuchProviderException e) {
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 //	private static String getFrom(Message javaMailMessage) throws MessagingException {
 //		String from = "";
 //		Address a[] = javaMailMessage.getFrom();
