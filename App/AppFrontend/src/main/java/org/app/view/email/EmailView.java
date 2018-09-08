@@ -5,15 +5,18 @@ import javax.inject.Inject;
 
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
-import org.app.view.email.inbox.InboxView;
+import org.app.view.email.inbox.InboxMessage;
+import org.app.view.email.inbox.InboxSubject;
 import org.app.view.email.settings.SettingsView;
 
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -21,17 +24,17 @@ import com.vaadin.ui.VerticalLayout;
 public class EmailView extends VerticalLayout implements View {
 
 	@Inject
-	InboxView inboxView;
+	InboxMessage inboxView;
 
 	@Inject
 	EmailService service;
-	
+
 	private I18n i18n;
-	private VerticalLayout mainView;
 	private EmailTopMenu emailTopMenu;
-	private HorizontalLayout emailContentView;
+	private HorizontalSplitPanel emailContent;
 	private VerticalLayout emailContentLeftBar;
-	private VerticalLayout emailContentRightBar;
+	private HorizontalSplitPanel emailContentRightBar;
+
 	private Button inboxButton;
 	private Button outboxButton;
 	private Button trashButton;
@@ -40,52 +43,53 @@ public class EmailView extends VerticalLayout implements View {
 	private Button settingsButton;
 
 	public EmailView() {
-		i18n = new I18n();
 		setSizeFull();
-		setMargin(new MarginInfo(true, true, true, true));
+		setMargin(false);
 	}
 
 	@PostConstruct
 	void init() {
-		mainView = new VerticalLayout();
-		mainView.setMargin(false);
-		emailTopMenu = new EmailTopMenu(service);
-		emailContentView = new HorizontalLayout();
-		emailContentView.setMargin(false);
-		emailContentView.setSizeFull();
 
+		emailTopMenu = new EmailTopMenu(service);
+		emailTopMenu.setSizeFull();
+		emailContent = new HorizontalSplitPanel();
+		emailContent.setSizeFull();
+
+		/*
+		 * Left Navigation
+		 */
 		emailContentLeftBar = new VerticalLayout();
 		emailContentLeftBar.setMargin(false);
-		emailContentRightBar = new VerticalLayout();
-		emailContentLeftBar.setMargin(false);
-		emailContentRightBar.setSizeFull();
-
+		emailContentLeftBar.setSizeFull();
 		emailContentLeftBar.addComponent(showInboxView());
 		emailContentLeftBar.addComponent(showOutboxView());
 		emailContentLeftBar.addComponent(showTrashView());
 		emailContentLeftBar.addComponent(showArchiveView());
 		emailContentLeftBar.addComponent(showLostView());
 		emailContentLeftBar.addComponent(showSettingsView());
-		emailContentRightBar.addComponent(inboxView);
 
-		emailContentView.addComponent(emailContentLeftBar);
-		emailContentView.addComponent(emailContentRightBar);
-		emailContentView.setSizeFull();
+		/*
+		 * Right Content Side
+		 */
+		emailContentRightBar = new HorizontalSplitPanel();
+		emailContentRightBar.setSizeFull();
 
-		emailContentView.setExpandRatio(emailContentLeftBar, 0.2f);
-		emailContentView.setExpandRatio(emailContentRightBar, 0.8f);
+		emailContent.setFirstComponent(emailContentLeftBar);
+		emailContent.setSecondComponent(emailContentRightBar);
 
-		mainView.addComponent(emailTopMenu);
-		mainView.addComponent(emailContentView);
-		addComponent(mainView);
+		addComponent(emailTopMenu);
+		addComponent(emailContent);
+		setExpandRatio(emailTopMenu, 0.2f);
+		setExpandRatio(emailContent, 0.8f);
+
 	}
 
 	private Button showInboxView() {
 		inboxButton = new Button(i18n.EMAIL_INBOX, new Button.ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
-				emailContentRightBar.removeAllComponents();
-				emailContentRightBar.addComponent(inboxView);
+				emailContentRightBar.setFirstComponent(new InboxSubject(service));
+				emailContentRightBar.setSecondComponent(new InboxMessage());
 			}
 		});
 		return inboxButton;
@@ -112,7 +116,7 @@ public class EmailView extends VerticalLayout implements View {
 		});
 		return trashButton;
 	}
-	
+
 	private Button showArchiveView() {
 		archiveButton = new Button(i18n.EMAIL_ARCHIVE, new Button.ClickListener() {
 			@Override
@@ -123,7 +127,7 @@ public class EmailView extends VerticalLayout implements View {
 		});
 		return archiveButton;
 	}
-	
+
 	private Button showLostView() {
 		lostButton = new Button(i18n.EMAIL_LOST, new Button.ClickListener() {
 			@Override
@@ -134,7 +138,7 @@ public class EmailView extends VerticalLayout implements View {
 		});
 		return lostButton;
 	}
-	
+
 	private Button showSettingsView() {
 		settingsButton = new Button(i18n.EMAIL_SETTINGS, new Button.ClickListener() {
 			@Override
@@ -145,7 +149,7 @@ public class EmailView extends VerticalLayout implements View {
 		return settingsButton;
 	}
 
-
-
-
+	public HorizontalSplitPanel getEmailContentRightBar() {
+		return emailContentRightBar;
+	}
 }

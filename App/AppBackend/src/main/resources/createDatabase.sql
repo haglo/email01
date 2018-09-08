@@ -3,7 +3,7 @@ CREATE USER 'pilgeruser'@'localhost' IDENTIFIED BY '123atgfd';
 GRANT ALL ON pilgerdb.* TO 'pilgeruser'@'localhost' IDENTIFIED BY '123atgfd' WITH GRANT OPTION;
 
 
-create table Pmail (
+create table pilgerdb.Pmail (
 id  serial not null,
 comment varchar(255),
 uuid varchar(255),
@@ -12,4 +12,4 @@ pcontent text,
 pfrom varchar(255),
 psubject varchar(255),
 primary key (id)
-)
+);

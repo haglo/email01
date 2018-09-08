@@ -13,13 +13,14 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EmailTopMenu extends CustomComponent {
+public class EmailTopMenu extends CssLayout {
 
 	private I18n i18n;
 	private CheckingEmails checkingEmails;
 
 	public EmailTopMenu(EmailService service) {
 		i18n = new I18n();
+		
 		Button callButton = new Button(i18n.EMAIL_CALL,
 				e -> {
 					checkingEmails = new CheckingEmails();
@@ -53,8 +54,11 @@ public class EmailTopMenu extends CustomComponent {
 		CssLayout emailNavBar = new CssLayout(callButton, writeButton, answerButton, forwardButton, printButton,
 				deleteButton);
 		emailNavBar.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+		
+		addComponents(callButton, writeButton, answerButton, forwardButton, printButton,
+				deleteButton);
+		addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 
-		setCompositionRoot(emailNavBar);
 	}
 
 }

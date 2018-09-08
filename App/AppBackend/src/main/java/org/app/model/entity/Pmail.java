@@ -1,3 +1,4 @@
+
 package org.app.model.entity;
 
 import java.io.Serializable;

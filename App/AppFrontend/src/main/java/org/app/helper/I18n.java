@@ -1,14 +1,20 @@
 package org.app.helper;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.MimeUtility;
 
 
 public final class I18n {
 
 	public static final String HELP_VIEW = "Help";
 	public static final String EMAIL_VIEW = "Email";
-	public static final String INBOX_VIEW = "Inbox";
+	public static final String INBOX_MESSAGE = "InboxMessage";
+	public static final String INBOX_SUBJECT = "InboxSubject";
 	
 	public static final String EMAIL_CALL = "Call";
 	public static final String EMAIL_WRITE = "Write";
@@ -34,6 +40,38 @@ public final class I18n {
 	
 	
 	public static String WINDOW_WIDTH = "";
+	
+	
+	
+	// FROM    -> decodeHeader() -> DB.pfrom
+	// SUBJECT -> decodeHeader() -> DB.psubject
+	
+	// DB.pcontent -> parse header lines -> foreach header line: decodeHeader() -> 
+	
+	
+	public static String decodeHeader(String s) {
+		try {
+			String str = MimeUtility.decodeText(s);
+			for (byte c : str.getBytes() ) {
+				System.out.print (c + " ");
+			}
+			return str; 
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return s;
+		}
+	}
+
+//	public static String decodeHeader(String s) {
+//		try {
+//			return new String(MimeUtility.decodeWord(s).getBytes("iso-8859-1"), "UTF-8");
+////			return MimeUtility.decode(new ByteArrayInputStream(s.getBytes() ), "uuencode").toString();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return s;
+//		}
+//	}
 
 	public static String encodeToBase64(String token) {
 		String converted;
@@ -46,7 +84,7 @@ public final class I18n {
 		String decoded;
 		try {
 			byte[] asBytes = Base64.getDecoder().decode(token);
-			decoded = new String(asBytes, "utf-8");
+			decoded = new String(asBytes);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

@@ -209,16 +209,19 @@ public class CheckingEmails {
 				System.out.println("-------New Email-----------------");
 				System.out.println("---------------------------------");
 				System.out.println("Email Number " + (i + 1));
-				System.out.println("Subject: " + message.getSubject());
-				System.out.println("From: " + message.getFrom()[0]);
+				System.out.println("Subject: " + I18n.decodeHeader(message.getSubject()));
+				System.out.println("From: " + I18n.decodeHeader(message.getFrom()[0].toString()));
 				System.out.println("Text: " + message.getContent().toString());
 
 				System.out.println("---------------------------------");
+//				pmail = new Pmail();
+//				pmail.setPsubject(I18n.encodeToBase64(I18n.decodeHeader(message.getSubject())));
+//				pmail.setPfrom(I18n.encodeToBase64(I18n.decodeHeader(message.getFrom()[0].toString())));
+//				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
+//				service.getPmailDAO().create(pmail);
 				pmail = new Pmail();
-				pmail.setPsubject(I18n.encodeToBase64(message.getSubject()));
-				System.out.println("Subject von Pmail: " + pmail.getPsubject());
-
-				pmail.setPfrom(I18n.encodeToBase64(message.getFrom()[0].toString()));
+				pmail.setPsubject(I18n.decodeHeader(message.getSubject()));
+				pmail.setPfrom(I18n.decodeHeader(message.getFrom()[0].toString()));
 				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
 				service.getPmailDAO().create(pmail);
 
