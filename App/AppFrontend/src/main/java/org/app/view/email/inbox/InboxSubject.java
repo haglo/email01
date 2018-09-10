@@ -60,12 +60,13 @@ public class InboxSubject extends VerticalLayout implements View {
 			selectedMails = new HashSet<Pmail>();
 			selectedMails = event.getAllSelectedItems();
 			if (selectedMails.size() != 1) {
-				inboxMessage.setMessageContent("");
+//				inboxMessage.setHtmlMessageContent("");
 			} else {
 				selectedMail = getSelectedMail(selectedMails);
 				if (selectedMail != null) {
 					inboxMessage.addTextToHeader("An " + "Maier");
-					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
+					inboxMessage.setHtmlMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
+//					inboxMessage.setPlainMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
 				}
 			}
 			emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);

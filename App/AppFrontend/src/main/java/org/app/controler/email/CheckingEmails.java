@@ -2,6 +2,7 @@ package org.app.controler.email;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,300 +30,23 @@ import javax.mail.internet.MimeMultipart;
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
 import org.app.model.entity.Pmail;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 
 public class CheckingEmails {
 
 	private Pmail pmail;
 	private Store store;
+	private Folder emailFolder;
 	private MailServer mailServer;
-
-	public void readEmails(EmailService service) {
-
-		mailServer = new MailServer();
-//		mailServer.init(Mailprovider.PRIVATE);
-		mailServer.init();
-
-		try {
-
-			Session emailSession = Session.getDefaultInstance(mailServer.getProperties());
-			Store store = emailSession.getStore("imap");
-
-			store.connect(mailServer.getImapHost(), mailServer.getUsername(), mailServer.getPassword());
-			if (store.isConnected()) {
-				System.out.println("Connect to Imap: true");
-			}
-
-			// create the folder object and open it
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
-
-			// retrieve the messages from the folder in an array and print it
-			Message[] messages = emailFolder.getMessages();
-			System.out.println("messages.length---" + messages.length);
-
-			for (int i = 0, n = messages.length; i < n; i++) {
-				pmail = new Pmail();
-				Message message = messages[i];
-				pmail.setPsubject(I18n.encodeToBase64(message.getSubject()));
-				pmail.setPfrom(I18n.encodeToBase64(message.getFrom()[0].toString()));
-				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
-				service.getPmailDAO().create(pmail);
-			}
-
-			// close the store and folder objects
-			emailFolder.close(false);
-			store.close();
-
-		} catch (NoSuchProviderException e) {
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-//	public TreeSet<String> getEmailAddesses() throws MessagingException {
-//		// open the inbox folder
-//		Folder inbox = getEmailStore().getFolder("INBOX");
-//		inbox.open(Folder.READ_ONLY);
-//
-//		// get a list of javamail messages as an array of messages
-//		Message[] messages = inbox.getMessages();
-//
-//		TreeSet<String> treeSet = new TreeSet<String>();
-//
-//		for (int i = 0; i < messages.length; i++) {
-//			String from = getFrom(messages[i]);
-//			if (from != null) {
-//				from = removeQuotes(from);
-//				treeSet.add(from);
-//			}
-//		}
-//		return treeSet;
-//	}
-
-	public Store getEmailStore() throws MessagingException {
-		try {
-			Properties properties = new Properties();
-
-			String imapHost = "imap.gmail.com";
-			String username = "h.g.gloeckler@gmail.com";
-			String password = "1234:Atgfd";
-
-			properties.put("mail.imap.user", username);
-			properties.put("mail.imap.host", imapHost);
-			properties.put("mail.imap.port", 993);
-			properties.put("mail.imap.ssl.enable", true);
-
-			Session emailSession = Session.getDefaultInstance(properties);
-			store = emailSession.getStore("imaps");
-			store.connect(imapHost, username, password);
-
-//			store.getFolder("[Gmail]/Sent Mail");
-//			store.getFolder("[Gmail]/Drafts");
-
-		} catch (NoSuchProviderException e) {
-			e.printStackTrace();
-			store.close();
-		} catch (MessagingException e) {
-			e.printStackTrace();
-			store.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			store.close();
-		}
-
-		return store;
-	}
-
-	public void check() {
-
-		try {
-			Properties properties = new Properties();
-
-			String imapHost = "imap.gmail.com";
-			String username = "h.g.gloeckler@gmail.com";
-			String password = "1234:Atgfd";
-
-			properties.put("mail.imap.user", username);
-			properties.put("mail.imap.host", imapHost);
-			properties.put("mail.imap.port", 993);
-			properties.put("mail.imap.ssl.enable", true);
-
-			Session emailSession = Session.getDefaultInstance(properties);
-			Store store = emailSession.getStore("imaps");
-
-			store.connect(imapHost, username, password);
-			if (store.isConnected()) {
-				System.out.println("Connect to Imap: true");
-			}
-
-			// create the folder object and open it
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
-
-			// retrieve the messages from the folder in an array and print it
-			Message[] messages = emailFolder.getMessages();
-			System.out.println("messages.length---" + messages.length);
-
-			for (int i = 0, n = messages.length; i < n; i++) {
-				Message message = messages[i];
-				System.out.println("---------------------------------");
-				System.out.println("Email Number " + (i + 1));
-				System.out.println("Subject: " + message.getSubject());
-				System.out.println("From: " + message.getFrom()[0]);
-				System.out.println("Text: " + message.getContent().toString());
-
-			}
-
-			// close the store and folder objects
-			emailFolder.close(false);
-			store.close();
-
-		} catch (NoSuchProviderException e) {
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void check1(EmailService service) {
-
-		try {
-			Properties properties = new Properties();
-
-			String imapHost = "195.201.215.12";
-			String username = "hans-georg.gloeckler@gimtex.de";
-			String password = "1234:Atgfd";
-
-			properties.put("mail.imap.user", username);
-			properties.put("mail.imap.host", imapHost);
-			properties.put("mail.imap.port", 143);
-			properties.put("mail.imap.ssl.enable", false);
-
-			Session emailSession = Session.getDefaultInstance(properties);
-			Store store = emailSession.getStore("imaps");
-
-			store.connect(imapHost, username, password);
-			if (store.isConnected()) {
-				System.out.println("Connect to Imap: true");
-			}
-
-			// create the folder object and open it
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
-
-			// retrieve the messages from the folder in an array and print it
-			Message[] messages = emailFolder.getMessages();
-			System.out.println("messages.length---" + messages.length);
-
-			for (int i = 0, n = messages.length; i < n; i++) {
-				Message message = messages[i];
-				System.out.println("---------------------------------");
-				System.out.println("-------New Email-----------------");
-				System.out.println("---------------------------------");
-				System.out.println("Email Number " + (i + 1));
-				System.out.println("Subject: " + I18n.decodeHeader(message.getSubject()));
-				System.out.println("From: " + I18n.decodeHeader(message.getFrom()[0].toString()));
-				System.out.println("Text: " + message.getContent().toString());
-
-				System.out.println("---------------------------------");
-//				pmail = new Pmail();
-//				pmail.setPsubject(I18n.encodeToBase64(I18n.decodeHeader(message.getSubject())));
-//				pmail.setPfrom(I18n.encodeToBase64(I18n.decodeHeader(message.getFrom()[0].toString())));
-//				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
-//				service.getPmailDAO().create(pmail);
-				pmail = new Pmail();
-				pmail.setPsubject(I18n.decodeHeader(message.getSubject()));
-				pmail.setPfrom(I18n.decodeHeader(message.getFrom()[0].toString()));
-				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
-				service.getPmailDAO().create(pmail);
-
-			}
-
-//			for (int i = 0, n = messages.length; i < n; i++) {
-//				pmail = new Pmail();
-//				Message message = messages[i];
-//				pmail.setPsubject(I18n.encodeToBase64(message.getSubject()));
-//				pmail.setPfrom(I18n.encodeToBase64(message.getFrom()[0].toString()));
-//				pmail.setPcontent(I18n.encodeToBase64(message.getContent().toString()));
-//				service.getPmailDAO().create(pmail);
-//			}
-			// close the store and folder objects
-			emailFolder.close(false);
-			store.close();
-
-		} catch (NoSuchProviderException e) {
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void check2() {
-
-		try {
-			Properties properties = new Properties();
-
-			String imapHost = "195.201.215.12";
-			String username = "hans-georg.gloeckler@gimtex.de";
-			String password = "1234:Atgfd";
-
-			properties.put("mail.imap.user", username);
-			properties.put("mail.imap.host", imapHost);
-			properties.put("mail.imap.port", 143);
-			properties.put("mail.imap.ssl.enable", false);
-
-			Session emailSession = Session.getDefaultInstance(properties);
-			Store store = emailSession.getStore("imaps");
-
-			store.connect(imapHost, username, password);
-			if (store.isConnected()) {
-				System.out.println("Connect to Imap: true");
-			}
-
-			// create the folder object and open it
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
-
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
-			// retrieve the messages from the folder in an array and print it
-			Message[] messages = emailFolder.getMessages();
-			System.out.println("messages.length---" + messages.length);
-
-			for (int i = 0; i < messages.length; i++) {
-				Message message = messages[i];
-				System.out.println("---------------------------------");
-				writePart(message);
-				String line = reader.readLine();
-				if ("YES".equals(line)) {
-					message.writeTo(System.out);
-				} else if ("QUIT".equals(line)) {
-					break;
-				}
-			}
-			// close the store and folder objects
-			emailFolder.close(false);
-			store.close();
-
-		} catch (NoSuchProviderException e) {
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	public void check3(EmailService service) {
 		String messageContent = "";
 
+//		mailServer = new MailServer();
+//		mailServer.init(Mailprovider.PRIVATE);
+//		mailServer.init();
+
 		try {
 			Properties properties = new Properties();
 
@@ -336,23 +60,24 @@ public class CheckingEmails {
 			properties.put("mail.imap.ssl.enable", false);
 
 			Session emailSession = Session.getDefaultInstance(properties);
-			Store store = emailSession.getStore("imaps");
-
+			store = emailSession.getStore("imaps");
 			store.connect(imapHost, username, password);
 			if (store.isConnected()) {
 				System.out.println("Connect to Imap: true");
 			}
 
-			// create the folder object and open it
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
+//			Session emailSession = Session.getDefaultInstance(properties);
+//			store = emailSession.getStore("imaps");
+//			store.connect(imapHost, username, password);
+//
+//			Folder emailFolder = store.getFolder("[Gmail]/Sent Mail");
+//			Folder emailFolder = store.getFolder("[Gmail]/Drafts");
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			emailFolder = store.getFolder("INBOX");
+			emailFolder.open(Folder.READ_ONLY);
 
 			// retrieve the messages from the folder in an array and print it
 			Message[] messages = emailFolder.getMessages();
-			System.out.println("messages.length---" + messages.length);
-
 			for (int i = 0; i < messages.length; i++) {
 				Message message = messages[i];
 				if (message instanceof MimeMessage) {
@@ -397,11 +122,12 @@ public class CheckingEmails {
 					DataHandler handler = bodyPart.getDataHandler();
 					System.out.println("file name : " + handler.getName());
 				} else {
-					resultMessage =  getTextFromBodyPart(bodyPart);
+					resultMessage = getTextFromBodyPart(bodyPart);
 				}
 			}
 		} else {
 			resultMessage = mimeMessage.getContent().toString();
+			resultMessage = transformPlainTextToMessage(resultMessage);
 		}
 		return resultMessage;
 
@@ -410,13 +136,17 @@ public class CheckingEmails {
 	private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws IOException, MessagingException {
 
 		int count = mimeMultipart.getCount();
-		if (count == 0)
+		if (count == 0) {
 			throw new MessagingException("Multipart with no body parts not supported.");
+		}
+
 		boolean multipartAlt = new ContentType(mimeMultipart.getContentType()).match("multipart/alternative");
-		if (multipartAlt)
+		if (multipartAlt) {
 			// alternatives appear in an order of increasing
 			// faithfulness to the original content. Customize as req'd.
 			return getTextFromBodyPart(mimeMultipart.getBodyPart(count - 1));
+		}
+
 		String result = "";
 		for (int i = 0; i < count; i++) {
 			BodyPart bodyPart = mimeMultipart.getBodyPart(i);
@@ -429,15 +159,12 @@ public class CheckingEmails {
 
 		String result = "";
 		if (bodyPart.isMimeType("text/plain")) {
-			result = (String) bodyPart.getContent();
+			String tmp = (String) bodyPart.getContent().toString();
+			result = transformPlainTextToMessage(tmp);
 		} else if (bodyPart.isMimeType("text/html")) {
 			String html = (String) bodyPart.getContent();
-			// as plain text
-//			result = org.jsoup.Jsoup.parse(html).text();
-			// as html text
-			result = html;
-//			System.out.println("HTML-String-8888: " + html);
-//			System.out.println("Plain-String-7777: " + result);
+			Whitelist whiteList = Whitelist.relaxed();
+			result = Jsoup.clean(html, whiteList);
 		} else if (bodyPart.getContent() instanceof MimeMultipart) {
 			result = getTextFromMimeMultipart((MimeMultipart) bodyPart.getContent());
 		}
@@ -592,4 +319,26 @@ public class CheckingEmails {
 //		return new String(newStringBuffer);
 //	}
 
+	public String transformPlainTextToMessage(String pmessage) {
+		StringBuilder sb = new StringBuilder();
+		try {
+			InputStream is = new ByteArrayInputStream(pmessage.getBytes());
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+			while (true) {
+				String line = br.readLine();
+				if (line == null)
+					break;
+				sb.append(line);
+				sb.append("<br>");
+			}
+
+		} catch (
+
+		IOException e) {
+			return e.getMessage();
+		}
+		return sb.toString();
+
+	}
 }

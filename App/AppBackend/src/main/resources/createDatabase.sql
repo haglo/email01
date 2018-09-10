@@ -10,7 +10,9 @@ uuid varchar(255),
 optlock integer DEFAULT 0 not null,
 pfrom varchar(255),
 psubject varchar(255),
-precipients text,
+precipientTO text,
+precipientCC text,
+precipientBCC text,
 pcontent text,
 primary key (id)
 );
