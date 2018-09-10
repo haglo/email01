@@ -28,14 +28,11 @@
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
 
 @import "../valo/valo.scss";
-@import 'loginview';
-@import 'menu';
+@import PilgerComponents.scss;
 
 @mixin appui {
   @include valo;
   @include loginview;
-  
   @include mainMenues;
-
-  // Insert your own theme rules here
+  @include emailMesssage;
 }

@@ -25,7 +25,9 @@ public class EmailTopMenu extends CssLayout {
 				e -> {
 					checkingEmails = new CheckingEmails();
 //					checkingEmails.readEmails(service);
-					checkingEmails.check1(service);
+//					checkingEmails.check1(service);
+//					checkingEmails.check2();
+					checkingEmails.check3(service);
 					UI.getCurrent().getNavigator().navigateTo(I18n.EMAIL_VIEW);
 				});
 		callButton.setIcon(VaadinIcons.CLOUD_DOWNLOAD);

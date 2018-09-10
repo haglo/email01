@@ -8,8 +8,9 @@ id  serial not null,
 comment varchar(255),
 uuid varchar(255),
 optlock integer DEFAULT 0 not null,
-pcontent text,
 pfrom varchar(255),
 psubject varchar(255),
+precipients text,
+pcontent text,
 primary key (id)
 );

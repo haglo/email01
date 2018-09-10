@@ -3,16 +3,10 @@ package org.app.view.email.inbox;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
 import org.app.model.entity.Pmail;
 import org.app.view.email.EmailView;
-
-import com.vaadin.cdi.CDIView;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.navigator.View;
@@ -25,14 +19,10 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
-@CDIView(I18n.INBOX_SUBJECT)
 public class InboxSubject extends VerticalLayout implements View {
 
-	@Inject
-	InboxMessage inboxMessage;
-
-	@Inject
-	EmailView emailView;
+	private InboxMessage inboxMessage;
+	private EmailView emailView;
 
 	private Grid<Pmail> grid;
 	private TextArea textArea;
@@ -42,12 +32,13 @@ public class InboxSubject extends VerticalLayout implements View {
 	private Pmail selectedMail;
 	private EmailService service;
 
-	public InboxSubject(EmailService service) {
-		this.service = service;
+	public InboxSubject(EmailView emailView) {
+		this.emailView = emailView;
+		this.inboxMessage = new InboxMessage();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
 
-		List<Pmail> list = service.getPmailDAO().findAll();
+		List<Pmail> list = emailView.getEmailService().getPmailDAO().findAll();
 		dataProvider = DataProvider.ofCollection(list);
 
 		grid = new Grid<Pmail>();
@@ -56,86 +47,34 @@ public class InboxSubject extends VerticalLayout implements View {
 		grid.setSelectionMode(SelectionMode.MULTI);
 		grid.setDataProvider(dataProvider);
 
-//		grid.addColumn(Pmail::getPfrom)
-//				.setRenderer(from -> from != null ? I18n.decodeFromBase64(from) : null, new TextRenderer())
-//				.setCaption("From");
-//		grid.addColumn(Pmail::getPsubject)
-//				.setRenderer(subject -> subject != null ? I18n.decodeFromBase64(subject) : null, new TextRenderer())
-//				.setCaption("Subject");
-//		grid.addColumn(Pmail::getPcontent)
-//				.setRenderer(content -> content != null ? I18n.decodeFromBase64(content) : null, new TextRenderer())
-//				.setCaption("Content");
-
-		grid.addColumn(Pmail::getPfrom)
-				.setRenderer(from -> from != null ? from : null, new TextRenderer())
+		grid.addColumn(Pmail::getPfrom).setRenderer(from -> from != null ? from : null, new TextRenderer())
 				.setCaption("From");
-		grid.addColumn(Pmail::getPsubject)
-				.setRenderer(subject -> subject != null ? subject : null, new TextRenderer())
+		grid.addColumn(Pmail::getPsubject).setRenderer(subject -> subject != null ? subject : null, new TextRenderer())
 				.setCaption("Subject");
 		grid.addColumn(Pmail::getPcontent)
 				.setRenderer(content -> content != null ? I18n.decodeFromBase64(content) : null, new TextRenderer())
 				.setCaption("Content");
-		
-//		grid.addSelectionListener(event -> {
-//			selectedMail = new Pmail();
-//			selectedMails = new HashSet<Pmail>();
-//			selectedMails = event.getAllSelectedItems();
-//			if (selectedMails.size() != 1) {
-//				inboxMessage.setVisible(false);
-//			} else {
-//				selectedMail = getTheSelectedMail(selectedMails);
-//				if (selectedMail != null) {
-//					InboxMessage ib = new InboxMessage();
-//					inboxMessage.setContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
-//					ib.setContent("Hallo Du");
-//					ib.setVisible(true);
-//					emailView.getEmailContentRightBar().setSecondComponent(ib);
-//					Notification.show("Hallo1 " + I18n.decodeFromBase64("Hallo1 " + selectedMail.getPcontent()));
-//				}
-//			}
-//		});
 
-		grid.addSelectionListener(event -> {
-		selectedMail = new Pmail();
-		selectedMails = new HashSet<Pmail>();
-		selectedMails = event.getAllSelectedItems();
-		if (selectedMails.size() != 1) {
-			inboxMessage.setVisible(false);
-		} else {
-			selectedMail = getTheSelectedMail(selectedMails);
-			if (selectedMail != null) {
-				inboxMessage.setContent("Hello 2");
-				Notification.show("Hallo1 " + I18n.decodeFromBase64("Hallo1 " + selectedMail.getPcontent()));
-			}
-		}
-	});
-
-		addComponent(grid);
-	}
-
-	@PostConstruct
-	void init() {
 		grid.addSelectionListener(event -> {
 			selectedMail = new Pmail();
 			selectedMails = new HashSet<Pmail>();
 			selectedMails = event.getAllSelectedItems();
 			if (selectedMails.size() != 1) {
-				inboxMessage.setVisible(false);
-			} else { 
-				selectedMail = getTheSelectedMail(selectedMails);
+				inboxMessage.setMessageContent("");
+			} else {
+				selectedMail = getSelectedMail(selectedMails);
 				if (selectedMail != null) {
-//					inboxMessage.setContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
-					inboxMessage.setContent("Hallo Du");
-					inboxMessage.setVisible(true);
-					emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);
-//					Notification.show(I18n.decodeFromBase64(selectedMail.getPcontent()));
-					Notification.show("Hallo2 " + I18n.decodeFromBase64(selectedMail.getPcontent()));
+					inboxMessage.addTextToHeader("An " + "Maier");
+					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
 				}
 			}
+			emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);
 		});
+
+		addComponent(grid);
 	}
 
-	private Pmail getTheSelectedMail(Set<Pmail> selectedMails) {
+	private Pmail getSelectedMail(Set<Pmail> selectedMails) {
 		selectedMail = new Pmail();
 		if (selectedMails.size() > 1) {
 			Notification.show("Only one Item");
@@ -152,11 +91,6 @@ public class InboxSubject extends VerticalLayout implements View {
 		}
 		return selectedMail;
 
-	}
-
-	public void refreshGrid() {
-		List<Pmail> list = this.service.getPmailDAO().findAll();
-		grid.setItems(list);
 	}
 
 }

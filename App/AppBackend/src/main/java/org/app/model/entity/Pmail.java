@@ -32,6 +32,9 @@ public class Pmail extends Superclass implements Serializable {
 	private String psubject;
 
 	@Lob
+	private String precipients;
+
+	@Lob
 	private String pcontent;
 
 	public String getPfrom() {
@@ -48,6 +51,14 @@ public class Pmail extends Superclass implements Serializable {
 
 	public void setPsubject(String psubject) {
 		this.psubject = psubject;
+	}
+
+	public String getPrecipients() {
+		return precipients;
+	}
+
+	public void setPrecipients(String precipients) {
+		this.precipients = precipients;
 	}
 
 	public String getPcontent() {

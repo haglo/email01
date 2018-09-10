@@ -24,13 +24,12 @@ import com.vaadin.ui.VerticalLayout;
 public class EmailView extends VerticalLayout implements View {
 
 	@Inject
-	InboxMessage inboxView;
-
-	@Inject
 	EmailService service;
 
 	private I18n i18n;
 	private EmailTopMenu emailTopMenu;
+	private InboxSubject inboxSubject;
+	private InboxMessage inboxMessage;
 	private HorizontalSplitPanel emailContent;
 	private VerticalLayout emailContentLeftBar;
 	private HorizontalSplitPanel emailContentRightBar;
@@ -55,25 +54,65 @@ public class EmailView extends VerticalLayout implements View {
 		emailContent = new HorizontalSplitPanel();
 		emailContent.setSizeFull();
 
+		Button inbox = new Button(i18n.EMAIL_INBOX, ev -> {
+			inboxSubject = new InboxSubject(this);
+			inboxMessage = new InboxMessage();
+			emailContentRightBar.setFirstComponent(inboxSubject);
+			emailContentRightBar.setSecondComponent(inboxMessage);
+		});
+
+		Button sent = new Button(i18n.EMAIL_SENT, ev -> {
+			inboxSubject = new InboxSubject(this);
+			inboxMessage = new InboxMessage();
+			emailContentRightBar.setFirstComponent(inboxSubject);
+			emailContentRightBar.setSecondComponent(inboxMessage);
+		});
+
+		Button trash = new Button(i18n.EMAIL_TRASH, ev -> {
+			inboxSubject = new InboxSubject(this);
+			inboxMessage = new InboxMessage();
+			emailContentRightBar.setFirstComponent(inboxSubject);
+			emailContentRightBar.setSecondComponent(inboxMessage);
+		});
+
+		Button archive = new Button(i18n.EMAIL_ARCHIVE, ev -> {
+			inboxSubject = new InboxSubject(this);
+			inboxMessage = new InboxMessage();
+			emailContentRightBar.setFirstComponent(inboxSubject);
+			emailContentRightBar.setSecondComponent(inboxMessage);
+		});
+
+		Button lost = new Button(i18n.EMAIL_LOST, ev -> {
+			inboxSubject = new InboxSubject(this);
+			inboxMessage = new InboxMessage();
+			emailContentRightBar.setFirstComponent(inboxSubject);
+			emailContentRightBar.setSecondComponent(inboxMessage);
+		});
+
+		Button settings = new Button(i18n.EMAIL_SETTINGS, ev -> {
+			inboxSubject = new InboxSubject(this);
+			inboxMessage = new InboxMessage();
+			emailContentRightBar.setFirstComponent(inboxSubject);
+			emailContentRightBar.setSecondComponent(inboxMessage);
+		});
 		/*
 		 * Left Navigation
 		 */
 		emailContentLeftBar = new VerticalLayout();
 		emailContentLeftBar.setMargin(false);
 		emailContentLeftBar.setSizeFull();
-		emailContentLeftBar.addComponent(showInboxView());
-		emailContentLeftBar.addComponent(showOutboxView());
-		emailContentLeftBar.addComponent(showTrashView());
-		emailContentLeftBar.addComponent(showArchiveView());
-		emailContentLeftBar.addComponent(showLostView());
-		emailContentLeftBar.addComponent(showSettingsView());
+		emailContentLeftBar.addComponent(inbox);
+		emailContentLeftBar.addComponent(sent);
+		emailContentLeftBar.addComponent(trash);
+		emailContentLeftBar.addComponent(archive);
+		emailContentLeftBar.addComponent(lost);
+		emailContentLeftBar.addComponent(settings);
 
 		/*
 		 * Right Content Side
 		 */
 		emailContentRightBar = new HorizontalSplitPanel();
 		emailContentRightBar.setSizeFull();
-
 		emailContent.setFirstComponent(emailContentLeftBar);
 		emailContent.setSecondComponent(emailContentRightBar);
 
@@ -84,72 +123,12 @@ public class EmailView extends VerticalLayout implements View {
 
 	}
 
-	private Button showInboxView() {
-		inboxButton = new Button(i18n.EMAIL_INBOX, new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				emailContentRightBar.setFirstComponent(new InboxSubject(service));
-				emailContentRightBar.setSecondComponent(new InboxMessage());
-			}
-		});
-		return inboxButton;
-	}
-
-	private Button showOutboxView() {
-		outboxButton = new Button(i18n.EMAIL_SENT, new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				emailContentRightBar.removeAllComponents();
-				emailContentRightBar.addComponent(inboxView);
-			}
-		});
-		return outboxButton;
-	}
-
-	private Button showTrashView() {
-		trashButton = new Button(i18n.EMAIL_TRASH, new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				emailContentRightBar.removeAllComponents();
-				emailContentRightBar.addComponent(inboxView);
-			}
-		});
-		return trashButton;
-	}
-
-	private Button showArchiveView() {
-		archiveButton = new Button(i18n.EMAIL_ARCHIVE, new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				emailContentRightBar.removeAllComponents();
-				emailContentRightBar.addComponent(inboxView);
-			}
-		});
-		return archiveButton;
-	}
-
-	private Button showLostView() {
-		lostButton = new Button(i18n.EMAIL_LOST, new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				emailContentRightBar.removeAllComponents();
-				emailContentRightBar.addComponent(inboxView);
-			}
-		});
-		return lostButton;
-	}
-
-	private Button showSettingsView() {
-		settingsButton = new Button(i18n.EMAIL_SETTINGS, new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				getUI().addWindow(new SettingsView());
-			}
-		});
-		return settingsButton;
+	public EmailService getEmailService() {
+		return service;
 	}
 
 	public HorizontalSplitPanel getEmailContentRightBar() {
 		return emailContentRightBar;
 	}
+
 }
