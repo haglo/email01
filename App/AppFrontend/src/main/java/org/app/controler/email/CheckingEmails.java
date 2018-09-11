@@ -24,8 +24,10 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
@@ -88,9 +90,48 @@ public class CheckingEmails {
 				}
 
 				pmail = new Pmail();
-				pmail.setPsubject(I18n.decodeHeader(message.getSubject()));
-				pmail.setPfrom(I18n.decodeHeader(message.getFrom()[0].toString()));
-				pmail.setPrecipients(I18n.decodeHeader(message.getRecipients(Message.RecipientType.TO).toString()));
+				pmail.setPsubject(MimeUtility.decodeText(message.getSubject()));
+				pmail.setPfrom(MimeUtility.decodeText(message.getFrom()[0].toString()));
+				try {
+					String to = MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)));
+					pmail.setPrecipientTO(to);
+				} catch (Exception e){
+					pmail.setPrecipientTO("");
+				}
+
+				try {
+					String cc = MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.CC)));
+					pmail.setPrecipientCC(cc);
+				} catch (Exception e){
+					pmail.setPrecipientCC("");
+				}
+
+				try {
+					String bcc = MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.BCC)));
+					pmail.setPrecipientBCC(bcc);
+				} catch (Exception e){
+					pmail.setPrecipientBCC("");
+				}
+
+//				if (InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)) != null)
+//					pmail.setPrecipientTO(
+//							MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO).toString()));
+//				if (message.getRecipients(Message.RecipientType.CC) != null)
+//					pmail.setPrecipientCC(
+//							MimeUtility.decodeText(message.getRecipients(Message.RecipientType.CC).toString()));
+//				if (message.getRecipients(Message.RecipientType.BCC) != null)
+//					pmail.setPrecipientBCC(
+//							MimeUtility.decodeText(message.getRecipients(Message.RecipientType.BCC).toString()));
+//				
+//                String to = InternetAddress.toString(
+//                        messages[i].getRecipients(Message.RecipientType.TO));
+//                        if (to != null) {
+//                            mail.setEmail2(to);
+//                        }
+//                        
+//                        MimeUtility.decodeText(s)
+				
+				pmail.setPsendDate(message.getSentDate().toString());
 				pmail.setPcontent(I18n.encodeToBase64(messageContent));
 				service.getPmailDAO().create(pmail);
 			}

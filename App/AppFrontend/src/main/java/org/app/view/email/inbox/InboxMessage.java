@@ -2,6 +2,7 @@ package org.app.view.email.inbox;
 
 import org.app.helper.I18n;
 
+import com.google.common.base.Strings;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.ContentMode;
@@ -13,45 +14,130 @@ import com.vaadin.ui.VerticalLayout;
 @CDIView(I18n.INBOX_MESSAGE)
 public class InboxMessage extends VerticalLayout implements View {
 
-	private VerticalLayout header;
-	private VerticalLayout content;
+
 	private Label htmlArea;
 	private HorizontalLayout footer;
 
 	private Label lblFrom;
 	private Label lblSubject;
-	private Label lblReply;
-	private Label lblTo;
+	private Label lblReplyTo;
+	private Label lblTO;
+	private Label lblCC;
+	private Label lblBCC;
+	private Label lblSendDate;
 
 	public InboxMessage() {
-		header = new VerticalLayout();
-		content = new VerticalLayout();
+
 		htmlArea = new Label();
 		htmlArea.setSizeFull();
 		htmlArea.setContentMode(ContentMode.HTML);
-//		area.setStyleName("v-emailMessage-label");
 		footer = new HorizontalLayout();
 
 		lblFrom = new Label("Von ");
 		lblSubject = new Label("Betreff ");
-		lblReply = new Label("Antwort an ");
-		lblTo = new Label("An ");
+		lblReplyTo = new Label("Antwort an ");
+		lblTO = new Label("An ");
+		lblCC = new Label("CC ");
+		lblBCC = new Label("BCC ");
+		lblSendDate = new Label();
 
 		footer.setHeight(10, Unit.PERCENTAGE);
 
-		addComponents(lblFrom, lblSubject, lblReply, lblTo);
-		addComponent(htmlArea);
-		addComponent(footer);
-//		setExpandRatio(area1, 0.9f);
-//		setExpandRatio(footer, 0.1f);
 	}
 
-	public void setHtmlMessageContent(String messageText) {
+	public void setMessageContent(String messageText) {
 		htmlArea.setValue(messageText);
 	}
+	
+	public void init() {
+		removeAllComponents();
+		lblFrom.setValue("");
+		lblSubject.setValue("");
+		lblReplyTo.setValue("");
+		lblTO.setValue("");
+		lblCC.setValue("");
+		lblBCC.setValue("");
+		lblSendDate.setValue("");
+		htmlArea.setValue("");
+	}
 
+	public void refresh() {
+		removeAllComponents();
+		if (!Strings.isNullOrEmpty(lblFrom.getValue()))
+			addComponent(lblFrom);
+		if (!lblSubject.getValue().isEmpty())
+			addComponent(lblSubject);
+		if (!Strings.isNullOrEmpty(lblReplyTo.getValue()))
+			addComponent(lblReplyTo);
+		if (!lblTO.getValue().isEmpty())
+			addComponent(lblTO);
+		if (!Strings.isNullOrEmpty(lblCC.getValue()))
+			addComponent(lblCC);
+		if (!lblBCC.getValue().isEmpty())
+			addComponent(lblBCC);
+		if (!lblSendDate.getValue().isEmpty())
+			addComponent(lblSendDate);
+		addComponent(htmlArea);
+		addComponent(footer);
+	}
 
 	public void addTextToHeader(String text) {
+	}
+
+	public Label getLblFrom() {
+		return lblFrom;
+	}
+
+	public void setLblFrom(Label lblFrom) {
+		this.lblFrom = lblFrom;
+	}
+
+	public Label getLblSubject() {
+		return lblSubject;
+	}
+
+	public void setLblSubject(Label lblSubject) {
+		this.lblSubject = lblSubject;
+	}
+
+	public Label getLblReplyTo() {
+		return lblReplyTo;
+	}
+
+	public void setLblReplyTo(Label lblReply) {
+		this.lblReplyTo = lblReply;
+	}
+
+	public Label getLblTO() {
+		return lblTO;
+	}
+
+	public void setLblTO(Label lblTO) {
+		this.lblTO = lblTO;
+	}
+
+	public Label getLblCC() {
+		return lblCC;
+	}
+
+	public void setLblCC(Label lblCC) {
+		this.lblCC = lblCC;
+	}
+
+	public Label getLblBCC() {
+		return lblBCC;
+	}
+
+	public void setLblBCC(Label lblBCC) {
+		this.lblBCC = lblBCC;
+	}
+
+	public Label getLblSendDate() {
+		return lblSendDate;
+	}
+
+	public void setLblSendDate(Label lblSendDate) {
+		this.lblSendDate = lblSendDate;
 	}
 
 }

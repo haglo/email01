@@ -7,6 +7,8 @@ import org.app.controler.EmailService;
 import org.app.helper.I18n;
 import org.app.model.entity.Pmail;
 import org.app.view.email.EmailView;
+
+import com.google.common.base.Strings;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.navigator.View;
@@ -22,18 +24,12 @@ import com.vaadin.ui.renderers.TextRenderer;
 public class InboxSubject extends VerticalLayout implements View {
 
 	private InboxMessage inboxMessage;
-	private EmailView emailView;
-
 	private Grid<Pmail> grid;
-	private TextArea textArea;
 	private ListDataProvider<Pmail> dataProvider;
-
 	private Set<Pmail> selectedMails;
 	private Pmail selectedMail;
-	private EmailService service;
 
 	public InboxSubject(EmailView emailView) {
-		this.emailView = emailView;
 		this.inboxMessage = new InboxMessage();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
@@ -60,13 +56,25 @@ public class InboxSubject extends VerticalLayout implements View {
 			selectedMails = new HashSet<Pmail>();
 			selectedMails = event.getAllSelectedItems();
 			if (selectedMails.size() != 1) {
-//				inboxMessage.setHtmlMessageContent("");
+				inboxMessage.setMessageContent("");
+				inboxMessage.init();
 			} else {
 				selectedMail = getSelectedMail(selectedMails);
 				if (selectedMail != null) {
-					inboxMessage.addTextToHeader("An " + "Maier");
-					inboxMessage.setHtmlMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
-//					inboxMessage.setPlainMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
+					inboxMessage.init();
+					if (!Strings.isNullOrEmpty(selectedMail.getPfrom()))
+						inboxMessage.getLblFrom().setValue("Von " + selectedMail.getPfrom());
+					if (!Strings.isNullOrEmpty(selectedMail.getPsubject()))
+						inboxMessage.getLblSubject().setValue("Betreff " + selectedMail.getPsubject());
+					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientTO()))
+						inboxMessage.getLblTO().setValue("An " + selectedMail.getPrecipientTO());
+					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientCC()))
+						inboxMessage.getLblCC().setValue("CC " + selectedMail.getPrecipientCC());
+					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientBCC()))
+						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
+					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
+					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
+					inboxMessage.refresh();
 				}
 			}
 			emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);

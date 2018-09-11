@@ -30,9 +30,17 @@ public class Pmail extends Superclass implements Serializable {
 	private String pfrom;
 
 	private String psubject;
+	
+	private String psendDate;
 
 	@Lob
-	private String precipients;
+	private String precipientTO;
+	
+	@Lob
+	private String precipientCC;
+	
+	@Lob
+	private String precipientBCC;
 
 	@Lob
 	private String pcontent;
@@ -53,12 +61,36 @@ public class Pmail extends Superclass implements Serializable {
 		this.psubject = psubject;
 	}
 
-	public String getPrecipients() {
-		return precipients;
+	public String getPsendDate() {
+		return psendDate;
 	}
 
-	public void setPrecipients(String precipients) {
-		this.precipients = precipients;
+	public void setPsendDate(String psendDate) {
+		this.psendDate = psendDate;
+	}
+
+	public String getPrecipientTO() {
+		return precipientTO;
+	}
+
+	public void setPrecipientTO(String precipientTO) {
+		this.precipientTO = precipientTO;
+	}
+
+	public String getPrecipientCC() {
+		return precipientCC;
+	}
+
+	public void setPrecipientCC(String precipientCC) {
+		this.precipientCC = precipientCC;
+	}
+
+	public String getPrecipientBCC() {
+		return precipientBCC;
+	}
+
+	public void setPrecipientBCC(String precipientBCC) {
+		this.precipientBCC = precipientBCC;
 	}
 
 	public String getPcontent() {

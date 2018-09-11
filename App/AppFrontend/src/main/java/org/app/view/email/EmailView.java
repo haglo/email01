@@ -11,6 +11,7 @@ import org.app.view.email.settings.SettingsView;
 
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
+import com.vaadin.server.Sizeable;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
@@ -53,6 +54,7 @@ public class EmailView extends VerticalLayout implements View {
 		emailTopMenu.setSizeFull();
 		emailContent = new HorizontalSplitPanel();
 		emailContent.setSizeFull();
+		emailContent.setSplitPosition(15, Unit.PERCENTAGE);
 
 		Button inbox = new Button(i18n.EMAIL_INBOX, ev -> {
 			inboxSubject = new InboxSubject(this);
@@ -113,8 +115,10 @@ public class EmailView extends VerticalLayout implements View {
 		 */
 		emailContentRightBar = new HorizontalSplitPanel();
 		emailContentRightBar.setSizeFull();
+		emailContentRightBar.setSplitPosition(40, Unit.PERCENTAGE);
 		emailContent.setFirstComponent(emailContentLeftBar);
 		emailContent.setSecondComponent(emailContentRightBar);
+
 
 		addComponent(emailTopMenu);
 		addComponent(emailContent);
