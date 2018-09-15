@@ -36,6 +36,7 @@ public final class I18n {
 	public static final String EMAIL_SUBJECT = "Subject";
 	public static final String EMAIL_FROM = "From";
 	public static final String EMAIL_SIGNATURE = "Signature";
+	public static final String EMAIL_FAILURE = "Failure in reading value";
 
 	public static String WINDOW_WIDTH = "";
 

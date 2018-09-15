@@ -14,7 +14,6 @@ import com.vaadin.ui.VerticalLayout;
 @CDIView(I18n.INBOX_MESSAGE)
 public class InboxMessage extends VerticalLayout implements View {
 
-
 	private Label htmlArea;
 	private HorizontalLayout footer;
 
@@ -48,7 +47,7 @@ public class InboxMessage extends VerticalLayout implements View {
 	public void setMessageContent(String messageText) {
 		htmlArea.setValue(messageText);
 	}
-	
+
 	public void init() {
 		removeAllComponents();
 		lblFrom.setValue("");
@@ -65,18 +64,17 @@ public class InboxMessage extends VerticalLayout implements View {
 		removeAllComponents();
 		if (!Strings.isNullOrEmpty(lblFrom.getValue()))
 			addComponent(lblFrom);
-		if (!lblSubject.getValue().isEmpty())
+		if (!Strings.isNullOrEmpty(lblSubject.getValue()))
 			addComponent(lblSubject);
 		if (!Strings.isNullOrEmpty(lblReplyTo.getValue()))
 			addComponent(lblReplyTo);
-		if (!lblTO.getValue().isEmpty())
+		if (!Strings.isNullOrEmpty(lblTO.getValue()))
 			addComponent(lblTO);
 		if (!Strings.isNullOrEmpty(lblCC.getValue()))
 			addComponent(lblCC);
-		if (!lblBCC.getValue().isEmpty())
+		if (!Strings.isNullOrEmpty(lblBCC.getValue()))
 			addComponent(lblBCC);
-		if (!lblSendDate.getValue().isEmpty())
-			addComponent(lblSendDate);
+		addComponent(lblSendDate);
 		addComponent(htmlArea);
 		addComponent(footer);
 	}

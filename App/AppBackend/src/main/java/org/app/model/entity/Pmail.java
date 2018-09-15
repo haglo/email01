@@ -28,10 +28,12 @@ public class Pmail extends Superclass implements Serializable {
 	public static final String QUERY_GET_ALL = "Pmail.GetAll";
 
 	private String pfrom;
-
+	
 	private String psubject;
 	
 	private String psendDate;
+	
+	private String preceiveDate;
 
 	@Lob
 	private String precipientTO;
@@ -67,6 +69,14 @@ public class Pmail extends Superclass implements Serializable {
 
 	public void setPsendDate(String psendDate) {
 		this.psendDate = psendDate;
+	}
+
+	public String getPreceiveDate() {
+		return preceiveDate;
+	}
+
+	public void setPreceiveDate(String receiveDate) {
+		this.preceiveDate = receiveDate;
 	}
 
 	public String getPrecipientTO() {

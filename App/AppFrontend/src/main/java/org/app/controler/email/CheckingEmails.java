@@ -80,59 +80,57 @@ public class CheckingEmails {
 
 			// retrieve the messages from the folder in an array and print it
 			Message[] messages = emailFolder.getMessages();
+
+//			for ( Message message : emailFolder.getMessages() )
 			for (int i = 0; i < messages.length; i++) {
 				Message message = messages[i];
-				if (message instanceof MimeMessage) {
-					MimeMessage mimeMessage = (MimeMessage) message;
-					messageContent = getContentFromEmail(mimeMessage);
-				} else {
-					messageContent = message.toString();
-				}
+				ExtractContent ec = new ExtractContent(message);
+
+//				if (message instanceof MimeMessage) {
+//					MimeMessage mimeMessage = (MimeMessage) message;
+//					messageContent = getContentFromEmail(mimeMessage);
+//				} else {
+//					messageContent = message.toString();
+//				}
 
 				pmail = new Pmail();
-				pmail.setPsubject(MimeUtility.decodeText(message.getSubject()));
 				pmail.setPfrom(MimeUtility.decodeText(message.getFrom()[0].toString()));
 				try {
-					String to = MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)));
+					pmail.setPsubject(MimeUtility.decodeText(message.getSubject()));
+				} catch (Exception e) {
+					pmail.setPsubject("");
+				}
+				try {
+					String to = MimeUtility
+							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)));
 					pmail.setPrecipientTO(to);
-				} catch (Exception e){
+				} catch (Exception e) {
 					pmail.setPrecipientTO("");
 				}
 
 				try {
-					String cc = MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.CC)));
+					String cc = MimeUtility
+							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.CC)));
 					pmail.setPrecipientCC(cc);
-				} catch (Exception e){
+				} catch (Exception e) {
 					pmail.setPrecipientCC("");
 				}
 
 				try {
-					String bcc = MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.BCC)));
+					String bcc = MimeUtility
+							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.BCC)));
 					pmail.setPrecipientBCC(bcc);
-				} catch (Exception e){
+				} catch (Exception e) {
 					pmail.setPrecipientBCC("");
 				}
 
-//				if (InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)) != null)
-//					pmail.setPrecipientTO(
-//							MimeUtility.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO).toString()));
-//				if (message.getRecipients(Message.RecipientType.CC) != null)
-//					pmail.setPrecipientCC(
-//							MimeUtility.decodeText(message.getRecipients(Message.RecipientType.CC).toString()));
-//				if (message.getRecipients(Message.RecipientType.BCC) != null)
-//					pmail.setPrecipientBCC(
-//							MimeUtility.decodeText(message.getRecipients(Message.RecipientType.BCC).toString()));
-//				
-//                String to = InternetAddress.toString(
-//                        messages[i].getRecipients(Message.RecipientType.TO));
-//                        if (to != null) {
-//                            mail.setEmail2(to);
-//                        }
-//                        
-//                        MimeUtility.decodeText(s)
-				
 				pmail.setPsendDate(message.getSentDate().toString());
-				pmail.setPcontent(I18n.encodeToBase64(messageContent));
+				pmail.setPreceiveDate(message.getReceivedDate().toString());
+
+//				pmail.setPcontent(I18n.encodeToBase64(messageContent));
+//				pmail.setPcontent(I18n.encodeToBase64(messageContent));
+				pmail.setPcontent(I18n.encodeToBase64(ec.getEmailContent()));
+//				pmail.setPcontent(ec.getEmailContent());
 				service.getPmailDAO().create(pmail);
 			}
 			// close the store and folder objects
@@ -153,6 +151,7 @@ public class CheckingEmails {
 
 		Object msgContent = mimeMessage.getContent();
 
+		// Email with Multipart
 		if (msgContent instanceof Multipart) {
 			Multipart multipart = (Multipart) msgContent;
 			for (int j = 0; j < multipart.getCount(); j++) {
@@ -166,6 +165,7 @@ public class CheckingEmails {
 					resultMessage = getTextFromBodyPart(bodyPart);
 				}
 			}
+			// Eamil with Single Part => plain/text
 		} else {
 			resultMessage = mimeMessage.getContent().toString();
 			resultMessage = transformPlainTextToMessage(resultMessage);
@@ -188,6 +188,7 @@ public class CheckingEmails {
 			return getTextFromBodyPart(mimeMultipart.getBodyPart(count - 1));
 		}
 
+		// Normal Mulitpart
 		String result = "";
 		for (int i = 0; i < count; i++) {
 			BodyPart bodyPart = mimeMultipart.getBodyPart(i);
@@ -249,6 +250,7 @@ public class CheckingEmails {
 			System.out.println("---------------------------");
 			writePart((Part) p.getContent());
 		}
+
 		// check if the content is an inline image
 		else if (p.isMimeType("image/jpeg")) {
 			System.out.println("--------> image/jpeg");
@@ -268,6 +270,7 @@ public class CheckingEmails {
 			FileOutputStream f2 = new FileOutputStream(downloadPath + "image.jpg");
 			f2.write(bArray);
 		}
+
 		// check if the content is an attached image
 		else if (p.getContentType().contains("image/")) {
 			System.out.println("content type" + p.getContentType());
@@ -279,6 +282,7 @@ public class CheckingEmails {
 			while ((bytesRead = test.read(buffer)) != -1) {
 				output.write(buffer, 0, bytesRead);
 			}
+
 		} else {
 			Object o = p.getContent();
 			if (o instanceof String) {

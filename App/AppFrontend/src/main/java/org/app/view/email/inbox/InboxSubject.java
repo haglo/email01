@@ -49,6 +49,7 @@ public class InboxSubject extends VerticalLayout implements View {
 				.setCaption("Subject");
 		grid.addColumn(Pmail::getPcontent)
 				.setRenderer(content -> content != null ? I18n.decodeFromBase64(content) : null, new TextRenderer())
+//				.setRenderer(content -> content != null ? content : null, new TextRenderer())
 				.setCaption("Content");
 
 		grid.addSelectionListener(event -> {
@@ -74,6 +75,7 @@ public class InboxSubject extends VerticalLayout implements View {
 						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
 					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
 					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
+//					inboxMessage.setMessageContent(selectedMail.getPcontent());
 					inboxMessage.refresh();
 				}
 			}
