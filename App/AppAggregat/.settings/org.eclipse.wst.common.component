@@ -1,40 +1,54 @@
-<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                    
-    
-    
-    
-    <wb-module deploy-name="AppAggregat-0.0.1-SNAPSHOT">
-                                        
-        
-        
-        
-        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                        
-        
-        
-        
-        <wb-resource deploy-path="/" source-path="/src/main/application" tag="defaultRootSource"/>
-        <dependent-module archiveName="AppFrontend-0.0.1-SNAPSHOT.war" deploy-path="/" handle="module:/resource/AppFrontend/AppFrontend">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="AppBackend-0.0.1-SNAPSHOT.jar" deploy-path="/" handle="module:/resource/AppBackend/AppBackend">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="jboss-ejb3-ext-api-2.2.0.Final.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/jboss/ejb3/jboss-ejb3-ext-api/2.2.0.Final/jboss-ejb3-ext-api-2.2.0.Final.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="jsr250-api-1.0.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/javax/annotation/jsr250-api/1.0/jsr250-api-1.0.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="commons-codec-1.11.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/commons-codec/commons-codec/1.11/commons-codec-1.11.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-                                    
-    
-    
-    
-    </wb-module>
-                
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId"
+	project-version="1.5.0">
+
+
+
+
+	<wb-module deploy-name="AppAggregat-0.0.1-SNAPSHOT">
+
+
+
+
+		<wb-resource deploy-path="/"
+			source-path="/target/m2e-wtp/ear-resources" />
+
+
+
+
+		<wb-resource deploy-path="/"
+			source-path="/src/main/application" tag="defaultRootSource" />
+		<dependent-module
+			archiveName="AppFrontend-0.0.1-SNAPSHOT.war" deploy-path="/"
+			handle="module:/resource/AppFrontend/AppFrontend">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module
+			archiveName="AppBackend-0.0.1-SNAPSHOT.jar" deploy-path="/"
+			handle="module:/resource/AppBackend/AppBackend">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module
+			archiveName="jboss-ejb3-ext-api-2.2.0.Final.jar" deploy-path="/lib"
+			handle="module:/classpath/var/M2_REPO/org/jboss/ejb3/jboss-ejb3-ext-api/2.2.0.Final/jboss-ejb3-ext-api-2.2.0.Final.jar">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module archiveName="jsr250-api-1.0.jar"
+			deploy-path="/lib"
+			handle="module:/classpath/var/M2_REPO/javax/annotation/jsr250-api/1.0/jsr250-api-1.0.jar">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module
+			archiveName="commons-codec-1.11.jar" deploy-path="/lib"
+			handle="module:/classpath/var/M2_REPO/commons-codec/commons-codec/1.11/commons-codec-1.11.jar">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+
+
+
+
+	</wb-module>
+
 
 
 
