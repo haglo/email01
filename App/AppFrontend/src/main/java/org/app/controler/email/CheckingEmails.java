@@ -124,12 +124,23 @@ public class CheckingEmails {
 					pmail.setPrecipientBCC("");
 				}
 
-				pmail.setPsendDate(message.getSentDate().toString());
-				pmail.setPreceiveDate(message.getReceivedDate().toString());
-
+				try {
+					pmail.setPsendDate(message.getSentDate().toString());
+				} catch (Exception e) {
+					pmail.setPsendDate("");
+				}
+				try {
+					pmail.setPreceiveDate(message.getReceivedDate().toString());
+				} catch (Exception e) {
+					pmail.setPreceiveDate("");
+				}
 //				pmail.setPcontent(I18n.encodeToBase64(messageContent));
 //				pmail.setPcontent(I18n.encodeToBase64(messageContent));
-				pmail.setPcontent(I18n.encodeToBase64(ec.getEmailContent()));
+				try {
+					pmail.setPcontent(I18n.encodeToBase64(ec.getEmailContent()));
+				} catch (Exception e) {
+					pmail.setPcontent("");
+				}
 //				pmail.setPcontent(ec.getEmailContent());
 				service.getPmailDAO().create(pmail);
 			}

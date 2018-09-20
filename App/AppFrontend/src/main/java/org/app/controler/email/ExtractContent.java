@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,18 +19,16 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 import org.app.helper.I18n;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
-import com.vaadin.ui.Notification;
 
 public class ExtractContent {
-	final String downloadPath = "C:/dev/upload/";
+	private String downloadPath;
 
 	private boolean showStructure = false;
 	private boolean showMessage = false;
@@ -38,7 +37,8 @@ public class ExtractContent {
 	private int attnum = 1;
 	private int level = 0;
 	private String emailEnvelope;
-	private List<File> Attachments;
+	private List<File> attachedFiles;
+	private List<String> attachedFileNames;
 
 	private static int counter;
 	private int tmp1;
@@ -55,6 +55,7 @@ public class ExtractContent {
 	private boolean isMultiPartAlternative;
 
 	private String emailContent;
+	private ExtractAttachment extractAttachment;
 
 	/**
 	 * Initialized with an Email-Message
@@ -83,12 +84,15 @@ public class ExtractContent {
 				extractAsciiEmailContent((MimeMessage) msg);
 			} else {
 				extractMimeEmailContent((MimeMessage) msg);
+				extractAttachment = new ExtractAttachment(msg);
 			}
 
+			/**
+			 * Special: Write if Alternative and there are no more others, only Alternative
+			 */
 			if (isAlternativeActive) {
-				System.out.println(">>> 1 Write now multipart/alternative in " + tmp1);
-//				System.out.println(">>> 1 Write plainText in " + plainText);
-//				System.out.println(">>> 1 Write htmlText in " + htmlText);
+				System.out.println(">>> 1 Write now multipart/alternative in " + tmp1
+						+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				if (htmlText.isEmpty())
 					result += plainText;
 				if (!htmlText.isEmpty())
@@ -96,7 +100,7 @@ public class ExtractContent {
 			}
 
 			setEmailContent(result);
-			
+
 		} catch (Exception e) {
 			System.out.println(">>> 1 Exception in main ");
 			setEmailContent(I18n.EMAIL_FAILURE);
@@ -112,11 +116,15 @@ public class ExtractContent {
 		subject = "";
 		htmlText = "";
 		plainText = "";
+		downloadPath = "C:/dev/upload/";
 
 		isMessageRfc = false;
 		isMultiPart = false;
 		isAlternativeActive = false;
 		isMultiPartAlternative = false;
+
+		attachedFiles = new ArrayList<File>();
+		attachedFileNames = new ArrayList<String>();
 
 		setEmailContent("");
 	}
@@ -142,13 +150,20 @@ public class ExtractContent {
 		System.out.println("------------------ ASCII-Mail -------------------------");
 		System.out.println(">>> Enter pure ASCII-Mail");
 		if (p.isMimeType("text/plain")) {
+			System.out.println(">>> Enter text/plain");
 			result += MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
 		}
 
-		if (p.isMimeType("text/html")) {
+		else if (p.isMimeType("text/html")) {
+			System.out.println(">>> Enter text/html");
 			String html = (String) MimeUtility.decodeText(p.getContent().toString());
 			Whitelist whiteList = Whitelist.relaxed();
 			result += Jsoup.clean(html, whiteList);
+		}
+
+		else {
+			System.out.println(">>> Enter else");
+			result += MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
 		}
 	}
 
@@ -174,24 +189,25 @@ public class ExtractContent {
 		/**
 		 * Content is MultiPart
 		 */
-		if (p.isMimeType("multipart/*")) {
+		else if (p.isMimeType("multipart/*")) {
 			System.out.println("---------------- Multipart -------------------------");
 			isMultiPart = true;
 			Multipart multipart = (Multipart) p.getContent();
 			for (int n = 0; n < multipart.getCount(); n++) {
 				tmp2++;
 				BodyPart bodyPart = multipart.getBodyPart(n);
+				MimeBodyPart mimeBodyPart = (MimeBodyPart) multipart.getBodyPart(n);
 				System.out.println(">>> Enter MulitPart: " + tmp2);
-				System.out.println("ContetType of MultiPart: " + multipart.getContentType().toString());
-				System.out.println("ContntType of BodyPart: " + bodyPart.getContentType().toString());
+				System.out.println(">>> ContetType of MultiPart: " + multipart.getContentType().toString());
+				System.out.println(">>> ContntType of BodyPart: " + bodyPart.getContentType().toString());
 
 				try {
 					isMultiPartAlternative = multipart.getContentType().toString().contains("multipart/alternative");
 					if (isMultiPartAlternative) {
-						if (bodyPart.isMimeType("text/plain")) {
+						if (checkShowInline(bodyPart) && bodyPart.isMimeType("text/plain")) {
 							plainText = MimeUtility.decodeText(plainTextToHTML(bodyPart.getContent().toString()));
 						}
-						if (bodyPart.isMimeType("text/html")) {
+						if (checkShowInline(bodyPart) && bodyPart.isMimeType("text/html")) {
 							String html = (String) MimeUtility.decodeText(bodyPart.getContent().toString());
 							Whitelist whiteList = Whitelist.relaxed();
 							htmlText = Jsoup.clean(html, whiteList);
@@ -202,26 +218,29 @@ public class ExtractContent {
 					isMultiPartAlternative = false;
 				}
 
-				System.out.println("boolean of isMultipartAlternative in " + tmp2 + " -- " + isMultiPartAlternative);
-				System.out.println("boolean of isAlternativeActive in " + tmp2 + " -- " + isAlternativeActive);
+				System.out
+						.println(">>> boolean of isMultipartAlternative in " + tmp2 + " -- " + isMultiPartAlternative);
+				System.out.println(">>> boolean of isAlternativeActive in " + tmp2 + " -- " + isAlternativeActive);
 
 				/**
-				 * Write Alternative, if there are more
+				 * Write if Alternative and there are more
 				 */
-				if (!isMultiPartAlternative && isAlternativeActive) {
-					System.out.println(">>> 2 Write now (if multipart/alternative) in " + tmp2);
+				if (checkShowInline(bodyPart) && !isMultiPartAlternative && isAlternativeActive) {
+					System.out.println(">>> 2 Write now (if multipart/alternative) in " + tmp2
+							+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 					if (htmlText.isEmpty())
 						result += plainText;
 					if (!htmlText.isEmpty())
 						result += htmlText;
 					isAlternativeActive = false;
 				}
-				
+
 				/**
-				 * Write no Alternative
+				 * Write if no Alternative
 				 */
-				if (!isMultiPartAlternative && !isAlternativeActive) {
-					System.out.println(">>> 3 Write now (if no multipart/alternative) in  " + tmp2);
+				if (checkShowInline(bodyPart) && !isMultiPartAlternative && !isAlternativeActive) {
+					System.out.println(">>> 3 Write now (if no multipart/alternative) in  " + tmp2
+							+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 					if (bodyPart.isMimeType("text/plain")) {
 						result += MimeUtility.decodeText(plainTextToHTML(bodyPart.getContent().toString()));
 					}
@@ -230,228 +249,28 @@ public class ExtractContent {
 						Whitelist whiteList = Whitelist.relaxed();
 						result += Jsoup.clean(html, whiteList);
 					}
+
 				}
 
 				extractMimeEmailContent(bodyPart);
+
 			}
+
 		}
-
-//		if (isMultiPart && !isMultiPartAlternative) {
-//			if (p.isMimeType("text/plain")) {
-//				result += MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
-//			}
-//
-//			if (p.isMimeType("text/html")) {
-//				String html = (String) MimeUtility.decodeText(p.getContent().toString());
-//				Whitelist whiteList = Whitelist.relaxed();
-//				result += Jsoup.clean(html, whiteList);
-//			}
-//		}
-//
-//		if (isMultiPart && isMultiPartAlternative) {
-//			if (p.isMimeType("text/plain")) {
-////				System.out.println("E) text/plain with Multipart and Alternative " + tmp1);
-//				plainText = MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
-//			}
-//
-//			if (p.isMimeType("text/html")) {
-////				System.out.println("E) text/html with no Multipart and Alternative " + tmp1);
-//				String html = (String) MimeUtility.decodeText(p.getContent().toString());
-//				Whitelist whiteList = Whitelist.relaxed();
-//				htmlText = Jsoup.clean(html, whiteList);
-//			}
-//		}
-
-//		/**
-//		 * Default: Whole Email is Multi-Part
-//		 */
-//		else if (p.isMimeType("multipart/*")) {
-//			String htmlText = "";
-//			String plainText = "";
-//			boolean withHTML = false;
-//			boolean withPlain = false;
-//			boolean isMimeAlternative = false;
-//
-//			MimeMultipart multipart = (MimeMultipart) p.getContent();
-//
-//			if (multipart.getCount() == 0) {
-//				throw new MessagingException("Multipart with no body parts not supported.");
-//			}
-//
-////			isMimeAlternative = new ContentType(multipart.getContentType()).match("multipart/alternative");
-//
-//			// Iterate over all BodyParts
-//			for (int n = 0; n < multipart.getCount(); n++) {
-//
-//				System.out.println("Is part " + n);
-//				BodyPart bodyPart = multipart.getBodyPart(n);
-//				isMimeAlternative = false;
-//				withHTML = false;
-//				withPlain = false;
-//
-//				if (bodyPart.getParent().getContentType().matches("multipart/alternative")) {
-//					isMimeAlternative = true;
-//					withHTML = new ContentType(bodyPart.getContentType()).match("text/html");
-//					withPlain = new ContentType(bodyPart.getContentType()).match("text/plain");
-//					if (withHTML) {
-//						String html = MimeUtility.decodeText(bodyPart.getContent().toString());
-//						Whitelist whiteList = Whitelist.relaxed();
-//						htmlText = Jsoup.clean(html, whiteList);
-//						plainText = "";
-//					}
-//					if (withPlain && htmlText.isEmpty()) {
-//						plainText = MimeUtility.decodeText(plainTextToHTML(bodyPart.getContent().toString()));
-//					}
-//
-//				}
-//				if (!isMimeAlternative && (!htmlText.isEmpty() || !plainText.isEmpty())) {
-//					if (!htmlText.isEmpty()) {
-//						result += htmlText;
-//					} else {
-//						result += plainText;
-//					}
-//					htmlText = "";
-//					plainText = "";
-//				}
-//
-////				if 
-////
-////				if (isMimeAlternative) {
-////					withHTML = false;
-////					withHTML = new ContentType(bodyPart.getContentType()).match("text/html");
-////					if (withHTML) {
-////						String html = MimeUtility.decodeText(bodyPart.getContent().toString());
-////						Whitelist whiteList = Whitelist.relaxed();
-////						htmlText += Jsoup.clean(html, whiteList);
-////					}
-////					if (!withHTML) {
-////						plainText = MimeUtility.decodeText(plainTextToHTML(bodyPart.getContent().toString()));
-////					}
-////					result += htmlText;
-//////					plainText = getMultiPartContent(bodyPart);
-////					System.out.println("Is multipart/alternative " + n);
-//////					getMultiPartContent(bodyPart);
-//
-//				else {
-//					System.out.println("Is multipart/* " + n);
-//					getNormalMimeMultipartContent(bodyPart);
-//				}
-//			}
-//		}
-//
-//		/**
-//		 * Content is something else
-//		 */
-//		else {
-//			Object o = p.getContent();
-//			if (o instanceof String) {
-//				System.out.println("1-PThis is a string");
-//				System.out.println("---------------------------");
-////				System.out.println((String) o);
-//			} else if (o instanceof InputStream) {
-//				System.out.println("2-PThis is just an input stream");
-//				System.out.println("---------------------------");
-//				InputStream is = (InputStream) o;
-//				is = (InputStream) o;
-//				int c;
-////				while ((c = is.read()) != -1)
-////					System.out.write(c);
-//			} else {
-//				System.out.println("3-PThis is an unknown type");
-//				System.out.println("---------------------------");
-////				System.out.println(o.toString());
-//			}
-//		}
-//
-//		/**
-//		 * get Attachment as file
-//		 */
-//		String disposition = p.getDisposition();
-//		if (disposition != null && (disposition.equalsIgnoreCase("ATTACHMENT"))) {
-//			System.out.println("4-PThis Mail have some attachment");
-//			DataHandler handler = p.getDataHandler();
-//			System.out.println("5-PThis file name : " + handler.getName());
-//		}
 
 	}
 
-	private String getMultiPartContent(Part p) throws IOException, MessagingException {
-		/**
-		 * tmp1: wie oft aufgerufen
-		 */
-		tmp1++;
-		boolean isHTML = new ContentType(p.getContentType()).match("text/html");
+	public boolean checkShowInline(Part p) {
+		boolean toShow = true;
 
-		if (isHTML) {
-			try {
-				String html = MimeUtility.decodeText(p.getContent().toString());
-				Whitelist whiteList = Whitelist.relaxed();
-				result = Jsoup.clean(html, whiteList);
-				System.out.println("isHTML: " + tmp1);
-			} catch (Exception e) {
-				result += "PPPP: Mit Fehler in 2";
-				System.out.println("PPPP: Mit Fehler in 2 " + tmp1);
+		try {
+			if (p.getDisposition() != null) {
+				toShow = false;
 			}
-
-		} else {
-			try {
-				String plain = MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
-				result = plain;
-				System.out.println("isPlainText: " + tmp1);
-			} catch (Exception e) {
-				result += "PPPP: Mit Fehler in 3";
-				System.out.println("PPPP: Mit Fehler in 3 " + tmp1);
-			}
+		} catch (MessagingException e) {
+			toShow = false;
 		}
-
-		return result;
-
-//		if (p.isMimeType("text/html")) {
-//			isHTML = true;
-//			try {
-//				String html = MimeUtility.decodeText(p.getContent().toString());
-//				Whitelist whiteList = Whitelist.relaxed();
-//				result += Jsoup.clean(html, whiteList);
-//			} catch (Exception e) {
-//				result += "PPPP: Mit Fehler in 2";
-//				System.out.println("PPPP: Mit Fehler in 2 " + tmp1);
-//			}
-//		}
-//
-//		else if (p.isMimeType("text/plain") && isHTML == false) {
-//			try {
-//				result += MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
-//			} catch (Exception e) {
-//				result += "PPPP: Mit Fehler in 3";
-//				System.out.println("PPPP: Mit Fehler in 3 " + tmp1);
-//			}
-//		}
-
-	}
-
-	private void getNormalMimeMultipartContent(Part p) throws IOException, MessagingException {
-		tmp2++;
-		System.out.println("Acthung in getNormalMimeMultipartContent " + tmp2);
-
-		if (p.isMimeType("text/html")) {
-			try {
-				String html = MimeUtility.decodeText(p.getContent().toString());
-				Whitelist whiteList = Whitelist.relaxed();
-				result += Jsoup.clean(html, whiteList);
-			} catch (Exception e) {
-				result += "PPPP: Mit Fehler in 2";
-				System.out.println("PPPP: Mit Fehler in 2 " + tmp1);
-			}
-		}
-
-		else if (p.isMimeType("text/plain")) {
-			try {
-				result += MimeUtility.decodeText(plainTextToHTML(p.getContent().toString()));
-			} catch (Exception e) {
-				result += "PPPP: Mit Fehler in 3";
-				System.out.println("PPPP: Mit Fehler in 3 " + tmp1);
-			}
-		}
+		return toShow;
 
 	}
 
@@ -461,6 +280,7 @@ public class ExtractContent {
 	 * 
 	 * @param pmessage
 	 * @return
+	 * @throws IOException
 	 */
 	public String plainTextToHTML(String pmessage) {
 		StringBuilder sb = new StringBuilder();
@@ -483,32 +303,6 @@ public class ExtractContent {
 		}
 		return sb.toString();
 
-	}
-
-	/**
-	 * Content is an inline image
-	 */
-	private void getInlineImageContent(BodyPart bodyPart) throws IOException, MessagingException {
-
-		int i;
-		byte[] bArray = new byte[0];
-		Object o = bodyPart.getContent();
-
-		InputStream x = (InputStream) o;
-		while ((i = (int) ((InputStream) x).available()) > 0) {
-			int j = (int) (((InputStream) x).read(bArray));
-			if (j == -1)
-				i = 0;
-			bArray = new byte[x.available()];
-			break;
-		}
-
-		FileOutputStream fileOutputStream = new FileOutputStream(downloadPath + "image.jpg");
-		fileOutputStream.write(bArray);
-		result += fileOutputStream.toString();
-
-		fileOutputStream.close();
-		x.close();
 	}
 
 	public String getEmailContent() {
