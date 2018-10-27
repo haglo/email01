@@ -18,6 +18,10 @@ import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
+import org.app.model.entity.enums.EmailFolder;
 
 @Entity
 @SuppressWarnings("all")
@@ -27,14 +31,14 @@ public class Pmail extends Superclass implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public static final String QUERY_GET_ALL = "Pmail.GetAll";
 
+	private Long pimapUid;
+	
+	private String pmessagID;
+	
+	private String preplyToID;
+	
 	private String pfrom;
 	
-	private String psubject;
-	
-	private String psendDate;
-	
-	private String preceiveDate;
-
 	@Lob
 	private String precipientTO;
 	
@@ -44,8 +48,50 @@ public class Pmail extends Superclass implements Serializable {
 	@Lob
 	private String precipientBCC;
 
+	private String psubject;
+	
+	private String psendDate;
+	
+	private String preceiveDate;
+	
+	private Integer pnumberOfAttachments;
+	
+	private String pfilenamesOfAttachments;
+	
+	private String pflags;
+	
+	private String plabels;
+	
+	/**
+	 * Einbinden: Enum EmailFolder über ComboBox
+	 */
+	@Enumerated(EnumType.STRING)
+	private EmailFolder emailFolder;
+
+	/**
+	 * body of the Email
+	 */
 	@Lob
 	private String pcontent;
+	
+	/**
+	 * Original Email
+	 */
+	@Lob
+	private String pmessage;	
+	
+
+	/*
+	 * Getter - Setter
+	 */
+
+	public Long getPimapUid() {
+		return pimapUid;
+	}
+
+	public void setPimapUid(Long pimapUid) {
+		this.pimapUid = pimapUid;
+	}
 
 	public String getPfrom() {
 		return pfrom;

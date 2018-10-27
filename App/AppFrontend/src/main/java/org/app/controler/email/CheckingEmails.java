@@ -23,6 +23,7 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.UIDFolder;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -30,6 +31,9 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 import org.app.controler.EmailService;
+import org.app.controler.email.read.ExtractContent;
+import org.app.controler.email.read.ExtractHeader;
+
 import org.app.helper.I18n;
 import org.app.model.entity.Pmail;
 import org.jsoup.Jsoup;
@@ -41,8 +45,11 @@ public class CheckingEmails {
 	private Store store;
 	private Folder emailFolder;
 	private MailServer mailServer;
+	private ExtractHeader extractHeader;
+	private ExtractContent extractContent;
 
 	public void check3(EmailService service) {
+		String tmp = "";
 		String messageContent = "";
 
 //		mailServer = new MailServer();
@@ -52,17 +59,37 @@ public class CheckingEmails {
 		try {
 			Properties properties = new Properties();
 
-			String imapHost = "195.201.215.12";
-			String username = "hans-georg.gloeckler@gimtex.de";
-			String password = "1234:Atgfd";
+//			String imapHost = "195.201.215.12";
+//			String username = "hans-georg.gloeckler@gimtex.de";
+//			String password = "1234:Atgfd";
+//
+//			properties.put("mail.imap.user", username);
+//			properties.put("mail.imap.host", imapHost);
+//			properties.put("mail.imap.port", 143);
+//			properties.put("mail.imap.ssl.enable", false);
+//
+//			Session emailSession = Session.getDefaultInstance(properties);
+//			store = emailSession.getStore("imaps");
+//			store.connect(imapHost, username, password);
+//			if (store.isConnected()) {
+//				System.out.println("Connect to Imap: true");
+//			}
+
+			String imapHost = "imap.gmx.net";
+			String username = "benjamin_strobel@gmx.de";
+			String password = "123atgfd";
+			Integer port = 993;
+			boolean isSSL = true;
 
 			properties.put("mail.imap.user", username);
 			properties.put("mail.imap.host", imapHost);
-			properties.put("mail.imap.port", 143);
-			properties.put("mail.imap.ssl.enable", false);
+			properties.put("mail.imap.port", port);
+			properties.put("mail.imap.ssl.enable", isSSL);
+			properties.put("mail.imap.auth", true);
 
 			Session emailSession = Session.getDefaultInstance(properties);
-			store = emailSession.getStore("imaps");
+
+			store = isSSL ? emailSession.getStore("imaps") : emailSession.getStore("imap");
 			store.connect(imapHost, username, password);
 			if (store.isConnected()) {
 				System.out.println("Connect to Imap: true");
@@ -77,14 +104,19 @@ public class CheckingEmails {
 
 			emailFolder = store.getFolder("INBOX");
 			emailFolder.open(Folder.READ_ONLY);
+			UIDFolder uidEmailFolder = (UIDFolder) emailFolder;
 
 			// retrieve the messages from the folder in an array and print it
 			Message[] messages = emailFolder.getMessages();
 
 //			for ( Message message : emailFolder.getMessages() )
 			for (int i = 0; i < messages.length; i++) {
+				System.out.println("Message: " + i);
 				Message message = messages[i];
-				ExtractContent ec = new ExtractContent(message);
+//				ExtractContent ec = new ExtractContent(message);
+//				ReadEmail rm = new ReadEmail(message);
+				extractHeader = new ExtractHeader(message);
+				extractContent = new ExtractContent(message);
 
 //				if (message instanceof MimeMessage) {
 //					MimeMessage mimeMessage = (MimeMessage) message;
@@ -94,55 +126,106 @@ public class CheckingEmails {
 //				}
 
 				pmail = new Pmail();
-				pmail.setPfrom(MimeUtility.decodeText(message.getFrom()[0].toString()));
-				try {
-					pmail.setPsubject(MimeUtility.decodeText(message.getSubject()));
-				} catch (Exception e) {
-					pmail.setPsubject("");
-				}
-				try {
-					String to = MimeUtility
-							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)));
-					pmail.setPrecipientTO(to);
-				} catch (Exception e) {
-					pmail.setPrecipientTO("");
-				}
+				pmail.setPimapUid(uidEmailFolder.getUID(message));
+				System.out.println("ok1: " + i + " -- " + uidEmailFolder.getUID(message));
 
-				try {
-					String cc = MimeUtility
-							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.CC)));
-					pmail.setPrecipientCC(cc);
-				} catch (Exception e) {
-					pmail.setPrecipientCC("");
+				tmp = "";
+				for (int n = 0; n < extractHeader.getFrom().length; n++) {
+					if (n == 0) {
+						tmp = tmp + extractHeader.getFrom()[n];
+					} else {
+						tmp = tmp + ", " + extractHeader.getFrom()[n];
+					}
 				}
+				pmail.setPfrom(tmp);
 
-				try {
-					String bcc = MimeUtility
-							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.BCC)));
-					pmail.setPrecipientBCC(bcc);
-				} catch (Exception e) {
-					pmail.setPrecipientBCC("");
-				}
+				pmail.setPsubject(extractHeader.getSubject());
 
-				try {
-					pmail.setPsendDate(message.getSentDate().toString());
-				} catch (Exception e) {
-					pmail.setPsendDate("");
+				tmp = "";
+				for (int n = 0; n < extractHeader.getTo().length; n++) {
+					if (n == 0) {
+						tmp = tmp + extractHeader.getTo()[n];
+					} else {
+						tmp = tmp + ", " + extractHeader.getTo()[n];
+					}
 				}
-				try {
-					pmail.setPreceiveDate(message.getReceivedDate().toString());
-				} catch (Exception e) {
-					pmail.setPreceiveDate("");
+				pmail.setPrecipientTO(tmp);
+
+				tmp = "";
+				for (int n = 0; n < extractHeader.getCc().length; n++) {
+					if (n == 0) {
+						tmp = tmp + extractHeader.getCc()[n];
+					} else {
+						tmp = tmp + ", " + extractHeader.getCc()[n];
+					}
 				}
-//				pmail.setPcontent(I18n.encodeToBase64(messageContent));
-//				pmail.setPcontent(I18n.encodeToBase64(messageContent));
-				try {
-					pmail.setPcontent(I18n.encodeToBase64(ec.getEmailContent()));
-				} catch (Exception e) {
-					pmail.setPcontent("");
+				pmail.setPrecipientCC(tmp);
+
+				tmp = "";
+				for (int n = 0; n < extractHeader.getBcc().length; n++) {
+					if (n == 0) {
+						tmp = tmp + extractHeader.getBcc()[n];
+					} else {
+						tmp = tmp + ", " + extractHeader.getBcc()[n];
+					}
 				}
-//				pmail.setPcontent(ec.getEmailContent());
+				pmail.setPrecipientBCC(tmp);
+
+				pmail.setPsendDate(extractHeader.getSendDate());
+				pmail.setPreceiveDate(extractHeader.getReceiveDate());
+				pmail.setPcontent(I18n.encodeToBase64(extractContent.getEmailContent()));
+
 				service.getPmailDAO().create(pmail);
+
+//				pmail.setPfrom(MimeUtility.decodeText(message.getFrom()[0].toString()));
+//				try {
+//					pmail.setPsubject(MimeUtility.decodeText(message.getSubject()));
+//				} catch (Exception e) {
+//					pmail.setPsubject("");
+//				}
+//				try {
+//					String to = MimeUtility
+//							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.TO)));
+//					pmail.setPrecipientTO(to);
+//				} catch (Exception e) {
+//					pmail.setPrecipientTO("");
+//				}
+//
+//				try {
+//					String cc = MimeUtility
+//							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.CC)));
+//					pmail.setPrecipientCC(cc);
+//				} catch (Exception e) {
+//					pmail.setPrecipientCC("");
+//				}
+//
+//				try {
+//					String bcc = MimeUtility
+//							.decodeText(InternetAddress.toString(message.getRecipients(Message.RecipientType.BCC)));
+//					pmail.setPrecipientBCC(bcc);
+//				} catch (Exception e) {
+//					pmail.setPrecipientBCC("");
+//				}
+//
+//				try {
+//					pmail.setPsendDate(message.getSentDate().toString());
+//				} catch (Exception e) {
+//					pmail.setPsendDate("");
+//				}
+//				try {
+//					pmail.setPreceiveDate(message.getReceivedDate().toString());
+//				} catch (Exception e) {
+//					pmail.setPreceiveDate("");
+//				}
+////				pmail.setPcontent(I18n.encodeToBase64(messageContent));
+////				pmail.setPcontent(I18n.encodeToBase64(messageContent));
+//				try {
+//					pmail.setPcontent(I18n.encodeToBase64(ec.getEmailContent()));
+//				} catch (Exception e) {
+//					pmail.setPcontent("");
+//				}
+////				pmail.setPcontent(ec.getEmailContent());
+//				service.getPmailDAO().create(pmail);
 			}
 			// close the store and folder objects
 			emailFolder.close(false);
@@ -157,72 +240,72 @@ public class CheckingEmails {
 		}
 	}
 
-	private String getContentFromEmail(MimeMessage mimeMessage) throws Exception {
-		String resultMessage = "";
-
-		Object msgContent = mimeMessage.getContent();
-
-		// Email with Multipart
-		if (msgContent instanceof Multipart) {
-			Multipart multipart = (Multipart) msgContent;
-			for (int j = 0; j < multipart.getCount(); j++) {
-				BodyPart bodyPart = multipart.getBodyPart(j);
-				String disposition = bodyPart.getDisposition();
-				if (disposition != null && (disposition.equalsIgnoreCase("ATTACHMENT"))) {
-					System.out.println("Mail have some attachment");
-					DataHandler handler = bodyPart.getDataHandler();
-					System.out.println("file name : " + handler.getName());
-				} else {
-					resultMessage = getTextFromBodyPart(bodyPart);
-				}
-			}
-			// Eamil with Single Part => plain/text
-		} else {
-			resultMessage = mimeMessage.getContent().toString();
-			resultMessage = transformPlainTextToMessage(resultMessage);
-		}
-		return resultMessage;
-
-	}
-
-	private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws IOException, MessagingException {
-
-		int count = mimeMultipart.getCount();
-		if (count == 0) {
-			throw new MessagingException("Multipart with no body parts not supported.");
-		}
-
-		boolean multipartAlt = new ContentType(mimeMultipart.getContentType()).match("multipart/alternative");
-		if (multipartAlt) {
-			// alternatives appear in an order of increasing
-			// faithfulness to the original content. Customize as req'd.
-			return getTextFromBodyPart(mimeMultipart.getBodyPart(count - 1));
-		}
-
-		// Normal Mulitpart
-		String result = "";
-		for (int i = 0; i < count; i++) {
-			BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-			result += getTextFromBodyPart(bodyPart);
-		}
-		return result;
-	}
-
-	private String getTextFromBodyPart(BodyPart bodyPart) throws IOException, MessagingException {
-
-		String result = "";
-		if (bodyPart.isMimeType("text/plain")) {
-			String tmp = (String) bodyPart.getContent().toString();
-			result = transformPlainTextToMessage(tmp);
-		} else if (bodyPart.isMimeType("text/html")) {
-			String html = (String) bodyPart.getContent();
-			Whitelist whiteList = Whitelist.relaxed();
-			result = Jsoup.clean(html, whiteList);
-		} else if (bodyPart.getContent() instanceof MimeMultipart) {
-			result = getTextFromMimeMultipart((MimeMultipart) bodyPart.getContent());
-		}
-		return result;
-	}
+//	private String getContentFromEmail(MimeMessage mimeMessage) throws Exception {
+//		String resultMessage = "";
+//
+//		Object msgContent = mimeMessage.getContent();
+//
+//		// Email with Multipart
+//		if (msgContent instanceof Multipart) {
+//			Multipart multipart = (Multipart) msgContent;
+//			for (int j = 0; j < multipart.getCount(); j++) {
+//				BodyPart bodyPart = multipart.getBodyPart(j);
+//				String disposition = bodyPart.getDisposition();
+//				if (disposition != null && (disposition.equalsIgnoreCase("ATTACHMENT"))) {
+//					System.out.println("Mail have some attachment");
+//					DataHandler handler = bodyPart.getDataHandler();
+//					System.out.println("file name : " + handler.getName());
+//				} else {
+//					resultMessage = getTextFromBodyPart(bodyPart);
+//				}
+//			}
+//			// Eamil with Single Part => plain/text
+//		} else {
+//			resultMessage = mimeMessage.getContent().toString();
+//			resultMessage = transformPlainTextToMessage(resultMessage);
+//		}
+//		return resultMessage;
+//
+//	}
+//
+//	private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws IOException, MessagingException {
+//
+//		int count = mimeMultipart.getCount();
+//		if (count == 0) {
+//			throw new MessagingException("Multipart with no body parts not supported.");
+//		}
+//
+//		boolean multipartAlt = new ContentType(mimeMultipart.getContentType()).match("multipart/alternative");
+//		if (multipartAlt) {
+//			// alternatives appear in an order of increasing
+//			// faithfulness to the original content. Customize as req'd.
+//			return getTextFromBodyPart(mimeMultipart.getBodyPart(count - 1));
+//		}
+//
+//		// Normal Mulitpart
+//		String result = "";
+//		for (int i = 0; i < count; i++) {
+//			BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+//			result += getTextFromBodyPart(bodyPart);
+//		}
+//		return result;
+//	}
+//
+//	private String getTextFromBodyPart(BodyPart bodyPart) throws IOException, MessagingException {
+//
+//		String result = "";
+//		if (bodyPart.isMimeType("text/plain")) {
+//			String tmp = (String) bodyPart.getContent().toString();
+//			result = transformPlainTextToMessage(tmp);
+//		} else if (bodyPart.isMimeType("text/html")) {
+//			String html = (String) bodyPart.getContent();
+//			Whitelist whiteList = Whitelist.relaxed();
+//			result = Jsoup.clean(html, whiteList);
+//		} else if (bodyPart.getContent() instanceof MimeMultipart) {
+//			result = getTextFromMimeMultipart((MimeMultipart) bodyPart.getContent());
+//		}
+//		return result;
+//	}
 
 	/*
 	 * This method checks for content-type based on which, it processes and fetches

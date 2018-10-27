@@ -1,7 +1,18 @@
 package org.app.view.email.inbox;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
@@ -18,19 +29,21 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
 public class InboxSubject extends VerticalLayout implements View {
 
-	private InboxMessage inboxMessage;
+	private InboxMessagePlainText inboxMessage;
+	private InboxMessageHtmlText inboxMessage2;
 	private Grid<Pmail> grid;
 	private ListDataProvider<Pmail> dataProvider;
 	private Set<Pmail> selectedMails;
 	private Pmail selectedMail;
 
 	public InboxSubject(EmailView emailView) {
-		this.inboxMessage = new InboxMessage();
+		this.inboxMessage = new InboxMessagePlainText();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
 
@@ -43,14 +56,21 @@ public class InboxSubject extends VerticalLayout implements View {
 		grid.setSelectionMode(SelectionMode.MULTI);
 		grid.setDataProvider(dataProvider);
 
+		grid.addColumn(Pmail::getId).setRenderer(id -> id != null ? id : null, new TextRenderer()).setCaption("ID");
 		grid.addColumn(Pmail::getPfrom).setRenderer(from -> from != null ? from : null, new TextRenderer())
 				.setCaption("From");
 		grid.addColumn(Pmail::getPsubject).setRenderer(subject -> subject != null ? subject : null, new TextRenderer())
 				.setCaption("Subject");
-		grid.addColumn(Pmail::getPcontent)
-				.setRenderer(content -> content != null ? I18n.decodeFromBase64(content) : null, new TextRenderer())
-//				.setRenderer(content -> content != null ? content : null, new TextRenderer())
-				.setCaption("Content");
+		grid.addColumn(p -> convertTimestamp(p.getPreceiveDate())).setCaption("Receive Date").setId("receiveDate");
+//		grid.addColumn(Pmail::getPreceiveDate)
+//				.setRenderer(receivedate -> receivedate != null ? receivedate : null, new TextRenderer())
+//				.setCaption("Receive Date");
+//		grid.addColumn(Pmail::getPcontent)
+//				.setRenderer(content -> content != null ? I18n.decodeFromBase64(content) : null, new TextRenderer())
+//				.setCaption("Content");
+
+//		Grid.Column receiveColumn = grid.getColumn("receiveDate");
+//		receiveColumn.setRenderer(new DateRenderer("%1$tB %1$te, %1$tY", Locale.ENGLISH));
 
 		grid.addSelectionListener(event -> {
 			selectedMail = new Pmail();
@@ -75,8 +95,9 @@ public class InboxSubject extends VerticalLayout implements View {
 						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
 					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
 					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
-//					inboxMessage.setMessageContent(selectedMail.getPcontent());
 					inboxMessage.refresh();
+					
+					inboxMessage2 = new InboxMessageHtmlText(I18n.decodeFromBase64(selectedMail.getPcontent()));
 				}
 			}
 			emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);
@@ -102,6 +123,14 @@ public class InboxSubject extends VerticalLayout implements View {
 		}
 		return selectedMail;
 
+	}
+
+	private String convertTimestamp(String dateString) {
+		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm", Locale.GERMAN);
+		ZonedDateTime dateTime = ZonedDateTime.parse(dateString, inputFormatter);
+		String out = dateTime.format(outputFormatter);
+		return out;
 	}
 
 }

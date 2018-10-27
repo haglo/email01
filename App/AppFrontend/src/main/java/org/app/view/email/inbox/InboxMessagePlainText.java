@@ -1,21 +1,22 @@
 package org.app.view.email.inbox;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 import org.app.helper.I18n;
 
 import com.google.common.base.Strings;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @CDIView(I18n.INBOX_MESSAGE)
-public class InboxMessage extends VerticalLayout implements View {
-
-	private Label htmlArea;
-	private HorizontalLayout footer;
+public class InboxMessagePlainText extends VerticalLayout implements View {
 
 	private Label lblFrom;
 	private Label lblSubject;
@@ -24,13 +25,12 @@ public class InboxMessage extends VerticalLayout implements View {
 	private Label lblCC;
 	private Label lblBCC;
 	private Label lblSendDate;
+	private Label htmlArea;
+	
+	private HorizontalLayout footer;
+	private CustomLayout cl;
 
-	public InboxMessage() {
-
-		htmlArea = new Label();
-		htmlArea.setSizeFull();
-		htmlArea.setContentMode(ContentMode.HTML);
-		footer = new HorizontalLayout();
+	public InboxMessagePlainText() {
 
 		lblFrom = new Label("Von ");
 		lblSubject = new Label("Betreff ");
@@ -40,8 +40,11 @@ public class InboxMessage extends VerticalLayout implements View {
 		lblBCC = new Label("BCC ");
 		lblSendDate = new Label();
 
+		htmlArea = new Label();
+		htmlArea.setSizeFull();
+		htmlArea.setContentMode(ContentMode.HTML);
+		footer = new HorizontalLayout();
 		footer.setHeight(10, Unit.PERCENTAGE);
-
 	}
 
 	public void setMessageContent(String messageText) {
@@ -137,5 +140,5 @@ public class InboxMessage extends VerticalLayout implements View {
 	public void setLblSendDate(Label lblSendDate) {
 		this.lblSendDate = lblSendDate;
 	}
-
+	
 }

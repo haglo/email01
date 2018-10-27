@@ -4,8 +4,9 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.app.controler.EmailService;
+import org.app.controler.email.read.Const;
 import org.app.helper.I18n;
-import org.app.view.email.inbox.InboxMessage;
+import org.app.view.email.inbox.InboxMessagePlainText;
 import org.app.view.email.inbox.InboxSubject;
 import org.app.view.email.settings.SettingsView;
 
@@ -22,7 +23,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @CDIView(I18n.EMAIL_VIEW)
-public class EmailView extends VerticalLayout implements View {
+public class EmailView extends VerticalLayout implements View, Const {
 
 	@Inject
 	EmailService service;
@@ -30,17 +31,10 @@ public class EmailView extends VerticalLayout implements View {
 	private I18n i18n;
 	private EmailTopMenu emailTopMenu;
 	private InboxSubject inboxSubject;
-	private InboxMessage inboxMessage;
+	private InboxMessagePlainText inboxMessagePlainText;
 	private HorizontalSplitPanel emailContent;
 	private VerticalLayout emailContentLeftBar;
 	private HorizontalSplitPanel emailContentRightBar;
-
-	private Button inboxButton;
-	private Button outboxButton;
-	private Button trashButton;
-	private Button archiveButton;
-	private Button lostButton;
-	private Button settingsButton;
 
 	public EmailView() {
 		setSizeFull();
@@ -58,45 +52,28 @@ public class EmailView extends VerticalLayout implements View {
 
 		Button inbox = new Button(i18n.EMAIL_INBOX, ev -> {
 			inboxSubject = new InboxSubject(this);
-			inboxMessage = new InboxMessage();
-			emailContentRightBar.setFirstComponent(inboxSubject);
-			emailContentRightBar.setSecondComponent(inboxMessage);
+			if (EMAIL_SECURITY_LEVEL == ESECURITY.PLAIN_TEXT) {
+				inboxMessagePlainText = new InboxMessagePlainText();
+				emailContentRightBar.setFirstComponent(inboxSubject);
+				emailContentRightBar.setSecondComponent(inboxMessagePlainText);
+			}
 		});
 
 		Button sent = new Button(i18n.EMAIL_SENT, ev -> {
-			inboxSubject = new InboxSubject(this);
-			inboxMessage = new InboxMessage();
-			emailContentRightBar.setFirstComponent(inboxSubject);
-			emailContentRightBar.setSecondComponent(inboxMessage);
 		});
 
 		Button trash = new Button(i18n.EMAIL_TRASH, ev -> {
-			inboxSubject = new InboxSubject(this);
-			inboxMessage = new InboxMessage();
-			emailContentRightBar.setFirstComponent(inboxSubject);
-			emailContentRightBar.setSecondComponent(inboxMessage);
 		});
 
 		Button archive = new Button(i18n.EMAIL_ARCHIVE, ev -> {
-			inboxSubject = new InboxSubject(this);
-			inboxMessage = new InboxMessage();
-			emailContentRightBar.setFirstComponent(inboxSubject);
-			emailContentRightBar.setSecondComponent(inboxMessage);
 		});
 
 		Button lost = new Button(i18n.EMAIL_LOST, ev -> {
-			inboxSubject = new InboxSubject(this);
-			inboxMessage = new InboxMessage();
-			emailContentRightBar.setFirstComponent(inboxSubject);
-			emailContentRightBar.setSecondComponent(inboxMessage);
 		});
 
 		Button settings = new Button(i18n.EMAIL_SETTINGS, ev -> {
-			inboxSubject = new InboxSubject(this);
-			inboxMessage = new InboxMessage();
-			emailContentRightBar.setFirstComponent(inboxSubject);
-			emailContentRightBar.setSecondComponent(inboxMessage);
 		});
+
 		/*
 		 * Left Navigation
 		 */
@@ -118,7 +95,6 @@ public class EmailView extends VerticalLayout implements View {
 		emailContentRightBar.setSplitPosition(40, Unit.PERCENTAGE);
 		emailContent.setFirstComponent(emailContentLeftBar);
 		emailContent.setSecondComponent(emailContentRightBar);
-
 
 		addComponent(emailTopMenu);
 		addComponent(emailContent);
