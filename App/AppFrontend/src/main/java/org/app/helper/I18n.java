@@ -12,7 +12,8 @@ public final class I18n {
 
 	public static final String HELP_VIEW = "Help";
 	public static final String EMAIL_VIEW = "Email";
-	public static final String INBOX_MESSAGE = "InboxMessage";
+	public static final String INBOX_MESSAGE_PLAIN_TEXT = "InboxMessagePlainText";
+	public static final String INBOX_MESSAGE_HTML_TEXT = "InboxMessageHtmlText";
 	public static final String INBOX_SUBJECT = "InboxSubject";
 
 	public static final String EMAIL_CALL = "Call";

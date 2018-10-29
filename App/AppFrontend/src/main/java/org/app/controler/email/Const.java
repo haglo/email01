@@ -1,4 +1,4 @@
-package org.app.controler.email.read;
+package org.app.controler.email;
 
 public interface Const {
 

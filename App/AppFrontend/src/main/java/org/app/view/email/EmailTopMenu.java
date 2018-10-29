@@ -1,7 +1,7 @@
 package org.app.view.email;
 
 import org.app.controler.EmailService;
-import org.app.controler.email.CheckingEmails;
+import org.app.controler.email.Imap;
 import org.app.helper.I18n;
 import org.app.view.email.send.SendView;
 
@@ -16,18 +16,15 @@ import com.vaadin.ui.themes.ValoTheme;
 public class EmailTopMenu extends CssLayout {
 
 	private I18n i18n;
-	private CheckingEmails checkingEmails;
+	private Imap imap;
 
 	public EmailTopMenu(EmailService service) {
 		i18n = new I18n();
 		
 		Button callButton = new Button(i18n.EMAIL_CALL,
 				e -> {
-					checkingEmails = new CheckingEmails();
-//					checkingEmails.readEmails(service);
-//					checkingEmails.check1(service);
-//					checkingEmails.check2();
-					checkingEmails.check3(service);
+					imap = new Imap();
+					imap.readFromImap(service);
 					UI.getCurrent().getNavigator().navigateTo(I18n.EMAIL_VIEW);
 				});
 		callButton.setIcon(VaadinIcons.CLOUD_DOWNLOAD);

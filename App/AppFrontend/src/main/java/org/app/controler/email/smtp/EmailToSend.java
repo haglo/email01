@@ -1,4 +1,4 @@
-package org.app.controler.email;
+package org.app.controler.email.smtp;
 
 import java.util.Set;
 

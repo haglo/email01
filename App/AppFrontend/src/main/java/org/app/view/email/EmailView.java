@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.app.controler.EmailService;
-import org.app.controler.email.read.Const;
+import org.app.controler.email.Const;
 import org.app.helper.I18n;
 import org.app.view.email.inbox.InboxMessagePlainText;
 import org.app.view.email.inbox.InboxSubject;

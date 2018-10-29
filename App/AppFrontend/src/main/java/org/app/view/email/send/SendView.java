@@ -5,8 +5,8 @@ import java.util.Set;
 
 import javax.activation.FileDataSource;
 
-import org.app.controler.email.EmailToSend;
 import org.app.controler.email.Smtp;
+import org.app.controler.email.smtp.EmailToSend;
 import org.app.helper.I18n;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;

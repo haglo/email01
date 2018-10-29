@@ -1,4 +1,4 @@
-package org.app.controler.email.read;
+package org.app.controler.email.imap;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

@@ -23,5 +23,5 @@ convert_from(loread(lo_open(precipientCC::int, x'40000'::int), x'40000'::int),  
 from pmail;
 
 select psubject, pfrom,
-convert_from(loread(lo_open(pcontent::int, x'40000'::int), x'40000'::int),  'UTF8')
+convert_from(loread(lo_open(pmessage::int, x'40000'::int), x'40000'::int),  'UTF8')
 from pmail;

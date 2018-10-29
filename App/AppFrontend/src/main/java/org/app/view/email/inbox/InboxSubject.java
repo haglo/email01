@@ -1,5 +1,10 @@
 package org.app.view.email.inbox;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,12 +14,25 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
+
 import org.app.controler.EmailService;
+import org.app.controler.email.Const;
+import org.app.controler.email.Const.ESECURITY;
+import org.app.controler.email.imap.ExtractContent;
 import org.app.helper.I18n;
 import org.app.model.entity.Pmail;
 import org.app.view.email.EmailView;
@@ -33,17 +51,22 @@ import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
-public class InboxSubject extends VerticalLayout implements View {
+public class InboxSubject extends VerticalLayout implements View, Const {
 
 	private InboxMessagePlainText inboxMessage;
-	private InboxMessageHtmlText inboxMessage2;
 	private Grid<Pmail> grid;
 	private ListDataProvider<Pmail> dataProvider;
 	private Set<Pmail> selectedMails;
 	private Pmail selectedMail;
 
 	public InboxSubject(EmailView emailView) {
-		this.inboxMessage = new InboxMessagePlainText();
+//		if (EMAIL_SECURITY_LEVEL == ESECURITY.PLAIN_TEXT) {
+//			this.inboxMessage = new InboxMessagePlainText();
+//		}
+//		if (EMAIL_SECURITY_LEVEL == ESECURITY.HTML_TEXT) {
+//			this.inboxMessage = new InboxMessageHtmlText();
+//		}
+		inboxMessage = new InboxMessagePlainText();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
 
@@ -62,15 +85,6 @@ public class InboxSubject extends VerticalLayout implements View {
 		grid.addColumn(Pmail::getPsubject).setRenderer(subject -> subject != null ? subject : null, new TextRenderer())
 				.setCaption("Subject");
 		grid.addColumn(p -> convertTimestamp(p.getPreceiveDate())).setCaption("Receive Date").setId("receiveDate");
-//		grid.addColumn(Pmail::getPreceiveDate)
-//				.setRenderer(receivedate -> receivedate != null ? receivedate : null, new TextRenderer())
-//				.setCaption("Receive Date");
-//		grid.addColumn(Pmail::getPcontent)
-//				.setRenderer(content -> content != null ? I18n.decodeFromBase64(content) : null, new TextRenderer())
-//				.setCaption("Content");
-
-//		Grid.Column receiveColumn = grid.getColumn("receiveDate");
-//		receiveColumn.setRenderer(new DateRenderer("%1$tB %1$te, %1$tY", Locale.ENGLISH));
 
 		grid.addSelectionListener(event -> {
 			selectedMail = new Pmail();
@@ -93,13 +107,31 @@ public class InboxSubject extends VerticalLayout implements View {
 						inboxMessage.getLblCC().setValue("CC " + selectedMail.getPrecipientCC());
 					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientBCC()))
 						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
-					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
+					if (selectedMail.getPnumberOfAttachments()>0)
+						inboxMessage.getLblAttachmentNumber().setValue("Number of Attachments " + selectedMail.getPnumberOfAttachments());
+					if (!Strings.isNullOrEmpty(selectedMail.getPfilenamesOfAttachments()))
+						inboxMessage.getLblAttachmentFileNames().setValue("Filename " + selectedMail.getPfilenamesOfAttachments());
+
 					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
-					inboxMessage.refresh();
 					
-					inboxMessage2 = new InboxMessageHtmlText(I18n.decodeFromBase64(selectedMail.getPcontent()));
+					byte[] byteDecodedEmail = Base64.getMimeDecoder().decode(selectedMail.getPmessage());
+					String decodedEmail = new String(byteDecodedEmail);
+					inboxMessage.setRawMail(decodedEmail);
+
+					
+					
+//					ExtractContent extractContent = new ExtractContent(createMessage(decodedEmail));
+					
+//					inboxMessage.setRawMail(Base64.getMimeDecoder().decode(selectedMail.getPmessage()));
+
+//					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
+//					String tmp = getEmailContent(selectedMail.getPmessage());
+//					inboxMessage.setMessageContent(tmp);
+				
+					inboxMessage.refresh();
 				}
 			}
+			// Important
 			emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);
 		});
 
@@ -131,6 +163,60 @@ public class InboxSubject extends VerticalLayout implements View {
 		ZonedDateTime dateTime = ZonedDateTime.parse(dateString, inputFormatter);
 		String out = dateTime.format(outputFormatter);
 		return out;
+	}
+
+//	private String getEmailContent(String email) {
+//		String result = "";
+//		try {
+//			Properties props = System.getProperties();
+//			props.put("mail.host", "smtp.dummydomain.com");
+//			props.put("mail.transport.protocol", "smtp");
+//			Session mailSession = Session.getDefaultInstance(props, null);
+//			Message message = new MimeMessage(mailSession);
+//			message.setText(email);
+//			ExtractContent extractContent = new ExtractContent(message);
+//			result = extractContent.getEmailContent();
+//			result = parseCID(result);
+//		} catch (MessagingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return result;
+//	}
+
+	private Message createMessage(String in) {
+		//replace end of line
+		String STRING1 = "\r\n";	//Linebreak Windows
+		String STRING2 = "\n";		//Linebreak Linux
+		String STRING3 = "<br>";
+		String tmp1 = in.replaceAll(STRING1, STRING2);
+		String tmp2 = tmp1.replaceAll(STRING2, STRING3);
+
+		InputStream source = null;
+		MimeMessage message = null;
+		Properties props = System.getProperties();
+		props.put("mail.host", "smtp.dummydomain.com");
+		props.put("mail.transport.protocol", "smtp");
+		Session mailSession = Session.getDefaultInstance(props, null);
+		try {
+			source = new ByteArrayInputStream(tmp2.getBytes("UTF_8"));
+			message = new MimeMessage(mailSession, source);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return message;
+	}
+	
+	@SuppressWarnings("static-access")
+	private static String parseCID(String in) {
+		String OLD_STRING = "\"cid:";
+		String NEW_STRING = "\"" + PATH_INLINE_IMAGES;
+		Pattern pattern = Pattern.compile(OLD_STRING);
+		Matcher matcher = pattern.matcher(in);
+		in = matcher.replaceAll(matcher.quoteReplacement(NEW_STRING));
+		return in;
+
 	}
 
 }

@@ -32,36 +32,36 @@ public class Pmail extends Superclass implements Serializable {
 	public static final String QUERY_GET_ALL = "Pmail.GetAll";
 
 	private Long pimapUid;
-	
+
 	private String pmessagID;
-	
+
 	private String preplyToID;
-	
+
 	private String pfrom;
-	
+
 	@Lob
 	private String precipientTO;
-	
+
 	@Lob
 	private String precipientCC;
-	
+
 	@Lob
 	private String precipientBCC;
 
 	private String psubject;
-	
+
 	private String psendDate;
-	
+
 	private String preceiveDate;
-	
+
 	private Integer pnumberOfAttachments;
-	
+
 	private String pfilenamesOfAttachments;
-	
+
 	private String pflags;
-	
+
 	private String plabels;
-	
+
 	/**
 	 * Einbinden: Enum EmailFolder über ComboBox
 	 */
@@ -69,21 +69,16 @@ public class Pmail extends Superclass implements Serializable {
 	private EmailFolder emailFolder;
 
 	/**
-	 * body of the Email
+	 * content of Email
 	 */
 	@Lob
 	private String pcontent;
-	
+
 	/**
 	 * Original Email
 	 */
 	@Lob
-	private String pmessage;	
-	
-
-	/*
-	 * Getter - Setter
-	 */
+	private String pmessage;
 
 	public Long getPimapUid() {
 		return pimapUid;
@@ -93,36 +88,28 @@ public class Pmail extends Superclass implements Serializable {
 		this.pimapUid = pimapUid;
 	}
 
+	public String getPmessagID() {
+		return pmessagID;
+	}
+
+	public void setPmessagID(String pmessagID) {
+		this.pmessagID = pmessagID;
+	}
+
+	public String getPreplyToID() {
+		return preplyToID;
+	}
+
+	public void setPreplyToID(String preplyToID) {
+		this.preplyToID = preplyToID;
+	}
+
 	public String getPfrom() {
 		return pfrom;
 	}
 
 	public void setPfrom(String pfrom) {
 		this.pfrom = pfrom;
-	}
-
-	public String getPsubject() {
-		return psubject;
-	}
-
-	public void setPsubject(String psubject) {
-		this.psubject = psubject;
-	}
-
-	public String getPsendDate() {
-		return psendDate;
-	}
-
-	public void setPsendDate(String psendDate) {
-		this.psendDate = psendDate;
-	}
-
-	public String getPreceiveDate() {
-		return preceiveDate;
-	}
-
-	public void setPreceiveDate(String receiveDate) {
-		this.preceiveDate = receiveDate;
 	}
 
 	public String getPrecipientTO() {
@@ -149,12 +136,84 @@ public class Pmail extends Superclass implements Serializable {
 		this.precipientBCC = precipientBCC;
 	}
 
+	public String getPsubject() {
+		return psubject;
+	}
+
+	public void setPsubject(String psubject) {
+		this.psubject = psubject;
+	}
+
+	public String getPsendDate() {
+		return psendDate;
+	}
+
+	public void setPsendDate(String psendDate) {
+		this.psendDate = psendDate;
+	}
+
+	public String getPreceiveDate() {
+		return preceiveDate;
+	}
+
+	public void setPreceiveDate(String preceiveDate) {
+		this.preceiveDate = preceiveDate;
+	}
+
+	public Integer getPnumberOfAttachments() {
+		return pnumberOfAttachments;
+	}
+
+	public void setPnumberOfAttachments(Integer pnumberOfAttachments) {
+		this.pnumberOfAttachments = pnumberOfAttachments;
+	}
+
+	public String getPfilenamesOfAttachments() {
+		return pfilenamesOfAttachments;
+	}
+
+	public void setPfilenamesOfAttachments(String pfilenamesOfAttachments) {
+		this.pfilenamesOfAttachments = pfilenamesOfAttachments;
+	}
+
+	public String getPflags() {
+		return pflags;
+	}
+
+	public void setPflags(String pflags) {
+		this.pflags = pflags;
+	}
+
+	public String getPlabels() {
+		return plabels;
+	}
+
+	public void setPlabels(String plabels) {
+		this.plabels = plabels;
+	}
+
+	public EmailFolder getEmailFolder() {
+		return emailFolder;
+	}
+
+	public void setEmailFolder(EmailFolder emailFolder) {
+		this.emailFolder = emailFolder;
+	}
+
 	public String getPcontent() {
 		return pcontent;
 	}
 
 	public void setPcontent(String pcontent) {
 		this.pcontent = pcontent;
+	}
+
+	public String getPmessage() {
+		return pmessage;
+	}
+
+	public void setPmessage(String pmessage) {
+		this.pmessage = pmessage;
 	}
 
 }

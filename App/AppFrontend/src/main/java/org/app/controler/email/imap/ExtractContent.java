@@ -1,4 +1,4 @@
-package org.app.controler.email.read;
+package org.app.controler.email.imap;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -23,6 +23,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
+import org.app.controler.email.Const;
 import org.app.helper.I18n;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
@@ -50,7 +51,7 @@ public class ExtractContent implements Const {
 	private String emailContent;
 	private ExtractAttachment extractAttachment;
 
-	public ExtractContent(Message msg) {
+	public ExtractContent(Part msg) {
 		extractAttachment = new ExtractAttachment();
 		init();
 
