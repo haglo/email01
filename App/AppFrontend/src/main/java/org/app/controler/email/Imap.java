@@ -30,7 +30,7 @@ import org.app.controler.email.imap.ExtractHeader;
 import org.app.helper.I18n;
 import org.app.model.entity.Pmail;
 
-public class Imap {
+public class Imap implements Const {
 
 	private Pmail pmail;
 	private Store store;
@@ -38,7 +38,7 @@ public class Imap {
 	private ExtractHeader extractHeader;
 	private ExtractContent extractContent;
 
-	public void readFromImap(EmailService service) {
+	public void readFromImap(EmailService service)  {
 		String tmp = "";
 
 		try {
@@ -75,7 +75,7 @@ public class Imap {
 				System.out.println("Message: " + i);
 				Message message = messages[i];
 				extractHeader = new ExtractHeader(message);
-				extractContent = new ExtractContent(message);
+				extractContent = new ExtractContent(message, uidEmailFolder.getUID(message));
 
 				pmail = new Pmail();
 				pmail.setPimapUid(uidEmailFolder.getUID(message));
@@ -137,6 +137,8 @@ public class Imap {
 					}
 				}
 				pmail.setPfilenamesOfAttachments(tmp);
+				
+				pmail.setPstorageFolderOfAttachments(EMAIL_STORAGE_PATH + "\\" +  uidEmailFolder.getUID(message));
 
 				pmail.setPcontent(I18n.encodeToBase64(extractContent.getEmailContent()));
 

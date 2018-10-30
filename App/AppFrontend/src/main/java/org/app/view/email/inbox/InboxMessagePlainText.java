@@ -46,7 +46,7 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 		lblAttachmentFileNames = new Label();
 
 		mailRawData = new Button("QuellCode", ev -> {
-			getUI().addWindow(new MailSourceCode(getRawMail()));
+			getUI().addWindow(new InboxRawMail(getRawMail()));
 		});
 
 		htmlArea = new Label();

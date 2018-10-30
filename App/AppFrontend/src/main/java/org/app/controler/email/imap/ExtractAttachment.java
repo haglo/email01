@@ -36,15 +36,17 @@ import org.app.helper.I18n;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
-public class ExtractAttachment implements Const{
+public class ExtractAttachment implements Const {
 
 	private List<File> attachedFiles;
 	private List<String> attachedFileNames;
 	private List<File> inlineFiles;
 	private List<String> inlineFileNames;
+	private Long id;
 
-	public ExtractAttachment() {
+	public ExtractAttachment(Long imapID) {
 		init();
+		setId(imapID);
 	}
 
 	private void init() {
@@ -61,6 +63,8 @@ public class ExtractAttachment implements Const{
 		String imgFileName = "";
 		DataSource fds = null;
 		String disposition = p.getDisposition();
+		String attachmentPath = PATH_ATTACHMENT + getId().toString() + "/";
+		String inlineImagePath = PATH_INLINE_IMAGES + getId().toString() + "/";
 
 		MimeBodyPart mimeBodyPart = (MimeBodyPart) p;
 
@@ -69,8 +73,14 @@ public class ExtractAttachment implements Const{
 		 */
 		if (disposition.equals(Part.ATTACHMENT) && (!p.getFileName().isEmpty())) {
 			attachedFileName = p.getFileName();
-			File file = new File(PATH_ATTACHMENT + attachedFileName);
+
+			File file = new File(attachmentPath + attachedFileName);
+			file.mkdirs();
 			System.out.println("$$$ 1bbb) Attachment-Standard - Filename: " + attachedFileName);
+			System.out.println("$$$ FileAbsolutPath: " + file.getAbsolutePath());
+			System.out.println("$$$ FileAbsolutPath: " + file.getAbsoluteFile());
+			System.out.println("$$$ FileCanonicalPath: " + file.getCanonicalPath());
+			System.out.println("$$$ FileCanonicalFile: " + file.getCanonicalFile());
 
 			InputStream is = p.getInputStream();
 			FileOutputStream fos = new FileOutputStream(file);
@@ -90,18 +100,19 @@ public class ExtractAttachment implements Const{
 		if (disposition.equals(Part.INLINE) && (!p.getFileName().isEmpty())) {
 			try {
 				inlineFileName = mimeBodyPart.getContentID().replaceAll(">", "").replaceAll("<", "");
-				imgFileName = PATH_INLINE_IMAGES + inlineFileName;
+				imgFileName = inlineImagePath + inlineFileName;
 				inlineFileNames.add(inlineFileName);
 			} catch (Exception e) {
-				//Image as Attachment for Download
+				// Image as Attachment for Download
 				inlineFileName = p.getFileName();
-				imgFileName = PATH_ATTACHMENT + inlineFileName;
+				imgFileName = attachmentPath + inlineFileName;
 				attachedFileNames.add(imgFileName);
 				inlineIsAttachment = true;
 			}
-			
+
 			fds = new FileDataSource(imgFileName);
 			File file = new File(imgFileName);
+			file.mkdirs();
 
 			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 			com.sun.mail.util.BASE64DecoderStream test = (com.sun.mail.util.BASE64DecoderStream) mimeBodyPart
@@ -118,9 +129,17 @@ public class ExtractAttachment implements Const{
 			} else {
 				inlineFiles.add(file);
 			}
-			
+
 		}
 
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public List<File> getAttachedFiles() {

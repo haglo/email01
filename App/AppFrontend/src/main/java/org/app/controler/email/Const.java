@@ -11,8 +11,12 @@ public interface Const {
 	}
 	
 	
-	public final String PATH_ATTACHMENT = "C:\\dev\\workspace\\email01\\EmailParser2\\ressources\\attachments\\";
-	public final String PATH_INLINE_IMAGES = "C:\\dev\\workspace\\email01\\EmailParser2\\ressources\\images\\";
+//	public final String PATH_ATTACHMENT = "C:\\dev\\workspace\\email01\\EmailParser2\\ressources\\attachments\\";
+//	public final String PATH_INLINE_IMAGES = "C:\\dev\\workspace\\email01\\EmailParser2\\ressources\\images\\";
+	public final String EMAIL_STORAGE_PATH = ".\\ressources1\\";
+	
+	public final String PATH_ATTACHMENT = ".\\ressources1\\attachments\\";
+	public final String PATH_INLINE_IMAGES = ".\\ressources1\\images\\";
 	
 	public final String ORIG_EMAIL_FILE = "C:\\dev\\workspace\\email01\\EmailParser2\\ressources\\origEmail.eml";
 	public final String NEW_EMAIL_FILE = "C:\\dev\\workspace\\email01\\EmailParser2\\ressources\\newEmail.eml";

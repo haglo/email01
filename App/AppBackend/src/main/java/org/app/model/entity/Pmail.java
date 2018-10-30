@@ -57,6 +57,8 @@ public class Pmail extends Superclass implements Serializable {
 	private Integer pnumberOfAttachments;
 
 	private String pfilenamesOfAttachments;
+	
+	private String pstorageFolderOfAttachments;
 
 	private String pflags;
 
@@ -174,6 +176,14 @@ public class Pmail extends Superclass implements Serializable {
 
 	public void setPfilenamesOfAttachments(String pfilenamesOfAttachments) {
 		this.pfilenamesOfAttachments = pfilenamesOfAttachments;
+	}
+
+	public String getPstorageFolderOfAttachments() {
+		return pstorageFolderOfAttachments;
+	}
+
+	public void setPstorageFolderOfAttachments(String pstorageFolderOfAttachments) {
+		this.pstorageFolderOfAttachments = pstorageFolderOfAttachments;
 	}
 
 	public String getPflags() {

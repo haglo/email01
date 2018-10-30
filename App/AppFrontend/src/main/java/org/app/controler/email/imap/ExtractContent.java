@@ -51,8 +51,8 @@ public class ExtractContent implements Const {
 	private String emailContent;
 	private ExtractAttachment extractAttachment;
 
-	public ExtractContent(Part msg) {
-		extractAttachment = new ExtractAttachment();
+	public ExtractContent(Part msg, Long imapID) {
+		extractAttachment = new ExtractAttachment(imapID);
 		init();
 
 		try {
