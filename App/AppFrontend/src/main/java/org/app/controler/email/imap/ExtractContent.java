@@ -1,41 +1,24 @@
 package org.app.controler.email.imap;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import javax.activation.DataHandler;
 import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
-
 import org.app.controler.email.Const;
-import org.app.helper.I18n;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.app.controler.email.imap.AIFile.FILE_TYPE;
 
 public class ExtractContent implements Const {
-	private List<File> attachedFiles;
-	private List<String> attachedFileNames;
+	private List<AIFile> aiFiles;
 	private int numberOfAttachments;
-
-	private List<File> inlineFiles;
-	private List<String> inlineFileNames;
-	private int numberOfInlineAttachments;
+	private int numberOfInlines;
 
 	private String result;
 	private String plainText;
@@ -74,14 +57,21 @@ public class ExtractContent implements Const {
 					result += htmlText;
 			}
 
-			setEmailContent(result);
-			attachedFiles = extractAttachment.getAttachedFiles();
-			attachedFileNames = extractAttachment.getAttachedFileNames();
-			numberOfAttachments = attachedFileNames.size();
+			aiFiles = extractAttachment.getAiFiles();
+			for (AIFile ai : aiFiles) {
+				if (ai.getFileType().equals(FILE_TYPE.ATTACHMENT))
+					numberOfAttachments++;
+				if (ai.getFileType().equals(FILE_TYPE.INLINE))
+					numberOfInlines++;
 
-			inlineFiles = extractAttachment.getInlineFiles();
-			inlineFileNames = extractAttachment.getInlineFileNames();
-			numberOfInlineAttachments = inlineFileNames.size();
+			}
+
+			result = result.replaceAll("\r\n", "");
+			result = result.replaceAll("\n", "");
+			result = parseCID(result, imapID);
+
+			setEmailContent(result);
+
 		} catch (Exception e) {
 			System.out.println(">>> 1 Exception in main ");
 			setEmailContent("Error by reading EmailContent");
@@ -101,8 +91,7 @@ public class ExtractContent implements Const {
 		isMultiPartAlternativePlain = false;
 		isMultiPartAlternativeHtml = false;
 
-		attachedFiles = new ArrayList<File>();
-		attachedFileNames = new ArrayList<String>();
+		aiFiles = new ArrayList<AIFile>();
 
 		setEmailContent("");
 	}
@@ -183,7 +172,7 @@ public class ExtractContent implements Const {
 							}
 						}
 					} catch (Exception e) {
-						result = "Error by reading Text of the message";
+						result = "Error-Content by reading Text of the message";
 					}
 				}
 
@@ -207,7 +196,7 @@ public class ExtractContent implements Const {
 						}
 
 					} catch (Exception e) {
-						result = "Error by reading Text of the Email";
+						result = "Error-Attachment by reading Text of the Email";
 					}
 
 				}
@@ -251,20 +240,68 @@ public class ExtractContent implements Const {
 
 	}
 
-	public List<File> getAttachedFiles() {
-		return attachedFiles;
+	@SuppressWarnings("static-access")
+	private String parseCID(String in, Long id) {
+
+		StringBuffer tmpSb;
+
+		String CID_STRING = "\"cid:";
+		String NEW_STRING = "\"" + MAIL_INLINE_IMAGES_PATH_CANONICAL + id + "/";
+		String fileExt = ".png1";
+		StringBuffer sb = new StringBuffer(in);
+		int cstart = 0;
+		int clength = 0;
+		int num = in.indexOf(CID_STRING);
+
+		while (num >= 0) {
+			String tmp = "";
+			tmpSb = new StringBuffer();
+
+			cstart = num;
+			clength = CID_STRING.length();
+
+			for (int i = cstart + clength; i <= sb.length() - 1; i++) {
+				if (sb.charAt(i) != '"') {
+					tmpSb.append(sb.charAt(i));
+				} else {
+					break;
+				}
+			}
+//			System.out.println("Länge von aiFiles: " + aiFiles.size()) ;
+
+			for (AIFile aif : aiFiles) {
+//				System.out.println("Demo-FileIDvor: " + aif.getFileId());
+				if (aif.getFileId().equalsIgnoreCase(tmpSb.toString())) {
+					fileExt = aif.getFileExtension();
+				}
+			}
+
+//			System.out.println("Demo-ermittelt: " + tmpSb.toString());
+//			System.out.println("Demo-FileExten: " + fileExt);
+			
+			sb.replace(cstart, cstart + clength, NEW_STRING);
+			int j = cstart + clength + NEW_STRING.length();
+			for (int n = j; n <= sb.length() - 1; n++) {
+				if (sb.charAt(n) == '"') {
+					sb.insert(n, fileExt);
+					break;
+				}
+			}
+
+			in = sb.toString();
+			num = in.indexOf(CID_STRING, num + 1);
+		}
+
+		return in;
+
 	}
 
-	public void setAttachedFiles(List<File> attachedFiles) {
-		this.attachedFiles = attachedFiles;
+	public List<AIFile> getAiFiles() {
+		return aiFiles;
 	}
 
-	public List<String> getAttachedFileNames() {
-		return attachedFileNames;
-	}
-
-	public void setAttachedFileNames(List<String> attachedFileNames) {
-		this.attachedFileNames = attachedFileNames;
+	public void setAiFiles(List<AIFile> aiFiles) {
+		this.aiFiles = aiFiles;
 	}
 
 	public int getNumberOfAttachments() {
@@ -275,28 +312,12 @@ public class ExtractContent implements Const {
 		this.numberOfAttachments = numberOfAttachments;
 	}
 
-	public List<File> getInlineFiles() {
-		return inlineFiles;
+	public int getNumberOfInlines() {
+		return numberOfInlines;
 	}
 
-	public void setInlineFiles(List<File> inlineFiles) {
-		this.inlineFiles = inlineFiles;
-	}
-
-	public List<String> getInlineFileNames() {
-		return inlineFileNames;
-	}
-
-	public void setInlineFileNames(List<String> inlineFileNames) {
-		this.inlineFileNames = inlineFileNames;
-	}
-
-	public int getNumberOfInlineAttachments() {
-		return numberOfInlineAttachments;
-	}
-
-	public void setNumberOfInlineAttachments(int numberOfInlineAttachments) {
-		this.numberOfInlineAttachments = numberOfInlineAttachments;
+	public void setNumberOfInlines(int numberOfInlines) {
+		this.numberOfInlines = numberOfInlines;
 	}
 
 	public String getEmailContent() {

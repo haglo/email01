@@ -1,30 +1,19 @@
 package org.app.controler.email;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Properties;
-import java.util.Scanner;
-
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
-import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
-
-import org.apache.commons.io.IOUtils;
 import org.app.controler.EmailService;
+import org.app.controler.email.imap.AIFile;
 import org.app.controler.email.imap.ExtractContent;
 import org.app.controler.email.imap.ExtractHeader;
 import org.app.helper.I18n;
@@ -129,16 +118,16 @@ public class Imap implements Const {
 				pmail.setPnumberOfAttachments(extractContent.getNumberOfAttachments());
 
 				tmp = "";
-				for (String s : extractContent.getAttachedFileNames()) {
+				for (AIFile aif : extractContent.getAiFiles()) {
 					if (tmp.isEmpty()) {
-						tmp = tmp + s;
+						tmp = tmp + aif.getFileName();
 					} else {
-						tmp = tmp + ", " + s;
+						tmp = tmp + ", " + aif.getFileName();
 					}
 				}
 				pmail.setPfilenamesOfAttachments(tmp);
 				
-				pmail.setPstorageFolderOfAttachments(EMAIL_STORAGE_PATH + "\\" +  uidEmailFolder.getUID(message));
+				pmail.setPstorageFolderOfAttachments(MAIL_ATTACHMENTS_PATH_ABSOLUT + "/" +  uidEmailFolder.getUID(message));
 
 				pmail.setPcontent(I18n.encodeToBase64(extractContent.getEmailContent()));
 

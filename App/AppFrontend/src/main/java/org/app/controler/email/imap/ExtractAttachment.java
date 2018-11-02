@@ -1,47 +1,25 @@
 package org.app.controler.email.imap;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.function.BiConsumer;
-
-import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
-import javax.mail.BodyPart;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
-
 import org.app.controler.email.Const;
-import org.app.helper.I18n;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.app.controler.email.imap.AIFile.FILE_TYPE;
 
 public class ExtractAttachment implements Const {
 
-	private List<File> attachedFiles;
-	private List<String> attachedFileNames;
-	private List<File> inlineFiles;
-	private List<String> inlineFileNames;
+	private AIFile aiFile;
+	private List<AIFile> aiFiles;
 	private Long id;
 
 	public ExtractAttachment(Long imapID) {
@@ -50,21 +28,27 @@ public class ExtractAttachment implements Const {
 	}
 
 	private void init() {
-		attachedFiles = new ArrayList<File>();
-		attachedFileNames = new ArrayList<String>();
-		inlineFiles = new ArrayList<File>();
-		inlineFileNames = new ArrayList<String>();
+		aiFile = new AIFile();
+		aiFiles = new ArrayList<AIFile>();
+
 	}
 
 	public void extract(Part p) throws IOException, MessagingException {
 		boolean inlineIsAttachment = false;
+
+		String attachedFileId = ""; // never exists
 		String attachedFileName = "";
+		String attachedFilePath = MAIL_ATTACHMENTS_PATH_ABSOLUT + getId().toString() + "/";
+		String attachedFileExtension = "";
+		String attachedFileFullName = "";
+
+		String inlineFileId = "";
 		String inlineFileName = "";
-		String imgFileName = "";
+		String inlineFileExtension = "";
+		String inlineFileFullName = "";
 		DataSource fds = null;
 		String disposition = p.getDisposition();
-		String attachmentPath = PATH_ATTACHMENT + getId().toString() + "/";
-		String inlineImagePath = PATH_INLINE_IMAGES + getId().toString() + "/";
+		String inlineFilePath = MAIL_INLINE_IMAGES_PATH_ABSOLUT + getId().toString() + "/";
 
 		MimeBodyPart mimeBodyPart = (MimeBodyPart) p;
 
@@ -73,14 +57,20 @@ public class ExtractAttachment implements Const {
 		 */
 		if (disposition.equals(Part.ATTACHMENT) && (!p.getFileName().isEmpty())) {
 			attachedFileName = p.getFileName();
+			attachedFileExtension = extractContentType(mimeBodyPart.getContentType().toLowerCase());
+			attachedFileFullName = attachedFilePath + attachedFileName + attachedFileExtension;
 
-			File file = new File(attachmentPath + attachedFileName);
-			file.mkdirs();
-			System.out.println("$$$ 1bbb) Attachment-Standard - Filename: " + attachedFileName);
-			System.out.println("$$$ FileAbsolutPath: " + file.getAbsolutePath());
-			System.out.println("$$$ FileAbsolutPath: " + file.getAbsoluteFile());
-			System.out.println("$$$ FileCanonicalPath: " + file.getCanonicalPath());
-			System.out.println("$$$ FileCanonicalFile: " + file.getCanonicalFile());
+			File directory = new File(attachedFilePath);
+			if (!directory.exists()) {
+				directory.mkdirs();
+			}
+
+			File file = new File(attachedFileFullName);
+//			System.out.println("$$$ 1bbb) Attachment-Standard - Filename: " + attachedFileName);
+//			System.out.println("$$$ FileAbsolutPath: " + file.getAbsolutePath());
+//			System.out.println("$$$ FileAbsolutPath: " + file.getAbsoluteFile());
+//			System.out.println("$$$ FileCanonicalPath: " + file.getCanonicalPath());
+//			System.out.println("$$$ FileCanonicalFile: " + file.getCanonicalFile());
 
 			InputStream is = p.getInputStream();
 			FileOutputStream fos = new FileOutputStream(file);
@@ -90,29 +80,44 @@ public class ExtractAttachment implements Const {
 				fos.write(buf, 0, bytesRead);
 			}
 			fos.close();
-			attachedFileNames.add(attachedFileName);
-			attachedFiles.add(file);
+			aiFile = new AIFile();
+			aiFile.setFileId(attachedFileId);
+			aiFile.setFileName(attachedFileName);
+			aiFile.setFilePath(attachedFilePath);
+			aiFile.setFileExtension(attachedFileExtension);
+			aiFile.setFileFullName(attachedFileFullName);
+			aiFile.setFileType(FILE_TYPE.ATTACHMENT);
+			aiFile.setFileBody(file);
+			aiFiles.add(aiFile);
 		}
 
 		/**
 		 * Inline Images
 		 */
 		if (disposition.equals(Part.INLINE) && (!p.getFileName().isEmpty())) {
+			inlineIsAttachment = false;
+			File attachedFileDir = new File(attachedFilePath);
+			if (!attachedFileDir.exists()) {
+				attachedFileDir.mkdirs();
+			}
+			File inlineFileDir = new File(inlineFilePath);
+			if (!inlineFileDir.exists()) {
+				inlineFileDir.mkdirs();
+			}
+
 			try {
-				inlineFileName = mimeBodyPart.getContentID().replaceAll(">", "").replaceAll("<", "");
-				imgFileName = inlineImagePath + inlineFileName;
-				inlineFileNames.add(inlineFileName);
+				inlineFileId = mimeBodyPart.getContentID().replaceAll(">", "").replaceAll("<", "");
+				inlineFileExtension = extractContentType(mimeBodyPart.getContentType().toLowerCase());
+				inlineFileFullName = inlineFilePath + inlineFileId + inlineFileExtension;
 			} catch (Exception e) {
 				// Image as Attachment for Download
 				inlineFileName = p.getFileName();
-				imgFileName = attachmentPath + inlineFileName;
-				attachedFileNames.add(imgFileName);
+				inlineFileFullName = attachedFilePath + inlineFileName + inlineFileExtension;
 				inlineIsAttachment = true;
 			}
 
-			fds = new FileDataSource(imgFileName);
-			File file = new File(imgFileName);
-			file.mkdirs();
+			fds = new FileDataSource(inlineFileFullName);
+			File file = new File(inlineFileFullName);
 
 			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 			com.sun.mail.util.BASE64DecoderStream test = (com.sun.mail.util.BASE64DecoderStream) mimeBodyPart
@@ -125,13 +130,59 @@ public class ExtractAttachment implements Const {
 			mimeBodyPart.saveFile(file);
 			output.close();
 			if (inlineIsAttachment) {
-				attachedFiles.add(file);
+				aiFile = new AIFile();
+				aiFile.setFileId(mimeBodyPart.getContentID().replaceAll(">", "").replaceAll("<", ""));
+				aiFile.setFileName(inlineFileName);
+				aiFile.setFilePath(attachedFilePath);
+				aiFile.setFileExtension(inlineFileExtension);
+				aiFile.setFileFullName(inlineFileFullName);
+				aiFile.setFileType(FILE_TYPE.ATTACHMENT);
+				aiFile.setFileBody(file);
+				aiFiles.add(aiFile);
 			} else {
-				inlineFiles.add(file);
+				aiFile = new AIFile();
+				aiFile.setFileId(mimeBodyPart.getContentID().replaceAll(">", "").replaceAll("<", ""));
+				aiFile.setFileName(inlineFileName);
+				aiFile.setFilePath(inlineFilePath);
+				aiFile.setFileExtension(inlineFileExtension);
+				aiFile.setFileFullName(inlineFileFullName);
+				aiFile.setFileType(FILE_TYPE.INLINE);
+				aiFile.setFileBody(file);
+				aiFiles.add(aiFile);
 			}
 
 		}
 
+	}
+
+	private String extractContentType(String in) {
+		String result = "";
+		if (in.contains("image/png"))
+			result = ".png";
+		if (in.contains("image/jpg"))
+			result = ".jpg";
+		if (in.contains("image/jpeg"))
+			result = ".jpeg";
+		if (in.contains("image/gif"))
+			result = ".gif";
+		return result;
+
+	}
+
+	public AIFile getAiFile() {
+		return aiFile;
+	}
+
+	public void setAiFile(AIFile aiFile) {
+		this.aiFile = aiFile;
+	}
+
+	public List<AIFile> getAiFiles() {
+		return aiFiles;
+	}
+
+	public void setAiFiles(List<AIFile> aiFiles) {
+		this.aiFiles = aiFiles;
 	}
 
 	public Long getId() {
@@ -140,38 +191,6 @@ public class ExtractAttachment implements Const {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public List<File> getAttachedFiles() {
-		return attachedFiles;
-	}
-
-	public void setAttachedFiles(List<File> attachedFiles) {
-		this.attachedFiles = attachedFiles;
-	}
-
-	public List<String> getAttachedFileNames() {
-		return attachedFileNames;
-	}
-
-	public void setAttachedFileNames(List<String> attachedFileNames) {
-		this.attachedFileNames = attachedFileNames;
-	}
-
-	public List<File> getInlineFiles() {
-		return inlineFiles;
-	}
-
-	public void setInlineFiles(List<File> inlineFiles) {
-		this.inlineFiles = inlineFiles;
-	}
-
-	public List<String> getInlineFileNames() {
-		return inlineFileNames;
-	}
-
-	public void setInlineFileNames(List<String> inlineFileNames) {
-		this.inlineFileNames = inlineFileNames;
 	}
 
 }

@@ -1,8 +1,7 @@
 package org.app.view.email.inbox;
 
-import javax.mail.Message;
-
 import org.app.helper.I18n;
+
 import com.google.common.base.Strings;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;

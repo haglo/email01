@@ -60,12 +60,6 @@ public class InboxSubject extends VerticalLayout implements View, Const {
 	private Pmail selectedMail;
 
 	public InboxSubject(EmailView emailView) {
-//		if (EMAIL_SECURITY_LEVEL == ESECURITY.PLAIN_TEXT) {
-//			this.inboxMessage = new InboxMessagePlainText();
-//		}
-//		if (EMAIL_SECURITY_LEVEL == ESECURITY.HTML_TEXT) {
-//			this.inboxMessage = new InboxMessageHtmlText();
-//		}
 		inboxMessage = new InboxMessagePlainText();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
@@ -107,27 +101,30 @@ public class InboxSubject extends VerticalLayout implements View, Const {
 						inboxMessage.getLblCC().setValue("CC " + selectedMail.getPrecipientCC());
 					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientBCC()))
 						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
-					if (selectedMail.getPnumberOfAttachments()>0)
-						inboxMessage.getLblAttachmentNumber().setValue("Number of Attachments " + selectedMail.getPnumberOfAttachments());
+					if (selectedMail.getPnumberOfAttachments() > 0)
+						inboxMessage.getLblAttachmentNumber()
+								.setValue("Number of Attachments " + selectedMail.getPnumberOfAttachments());
 					if (!Strings.isNullOrEmpty(selectedMail.getPfilenamesOfAttachments()))
-						inboxMessage.getLblAttachmentFileNames().setValue("Filename " + selectedMail.getPfilenamesOfAttachments());
+						inboxMessage.getLblAttachmentFileNames()
+								.setValue("Filename " + selectedMail.getPfilenamesOfAttachments());
 
-					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
-					
+					String tmp = I18n.decodeFromBase64(selectedMail.getPcontent());
+					tmp = parseCID(tmp, selectedMail.getPimapUid());
+					inboxMessage.setMessageContent(tmp);
+//					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
+
 					byte[] byteDecodedEmail = Base64.getMimeDecoder().decode(selectedMail.getPmessage());
 					String decodedEmail = new String(byteDecodedEmail);
 					inboxMessage.setRawMail(decodedEmail);
 
-					
-					
 //					ExtractContent extractContent = new ExtractContent(createMessage(decodedEmail));
-					
+
 //					inboxMessage.setRawMail(Base64.getMimeDecoder().decode(selectedMail.getPmessage()));
 
 //					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
 //					String tmp = getEmailContent(selectedMail.getPmessage());
 //					inboxMessage.setMessageContent(tmp);
-				
+
 					inboxMessage.refresh();
 				}
 			}
@@ -185,9 +182,9 @@ public class InboxSubject extends VerticalLayout implements View, Const {
 //	}
 
 	private Message createMessage(String in) {
-		//replace end of line
-		String STRING1 = "\r\n";	//Linebreak Windows
-		String STRING2 = "\n";		//Linebreak Linux
+		// replace end of line
+		String STRING1 = "\r\n"; // Linebreak Windows
+		String STRING2 = "\n"; // Linebreak Linux
 		String STRING3 = "<br>";
 		String tmp1 = in.replaceAll(STRING1, STRING2);
 		String tmp2 = tmp1.replaceAll(STRING2, STRING3);
@@ -207,16 +204,43 @@ public class InboxSubject extends VerticalLayout implements View, Const {
 		}
 		return message;
 	}
-	
+
+	/**
+	 * <td><img src="cid:part1.31DE7F3B.9BFBA689@gimtex.de" alt="" class=""></td>
+	 * 
+	 * @param in
+	 * @param id
+	 * @return
+	 */
+
 	@SuppressWarnings("static-access")
-	private static String parseCID(String in) {
+	private static String parseCID(String in, Long id) {
+		extractFileNameOfCid(in);
+		
+		
 		String OLD_STRING = "\"cid:";
-		String NEW_STRING = "\"" + PATH_INLINE_IMAGES;
+		String NEW_STRING = "\"./my-content/mail/images/" + id.toString() + "/";
 		Pattern pattern = Pattern.compile(OLD_STRING);
 		Matcher matcher = pattern.matcher(in);
 		in = matcher.replaceAll(matcher.quoteReplacement(NEW_STRING));
 		return in;
 
+	}
+
+	private static void extractFileNameOfCid(String in) {
+		int start = 0;
+		while (true) {
+			int found = in.indexOf("\"cid:", start);
+			System.out.println("CID found at: " + found);
+
+			if (found != -1) {
+				System.out.println("CID found at: " + found);
+				// Found one -- do whatever here
+			}
+			if (found == -1)
+				break;
+			start = found + 2; // move start up for next iteration
+		}
 	}
 
 }
