@@ -259,7 +259,9 @@ public class ExtractContent implements Const {
 
 			cstart = num;
 			clength = CID_STRING.length();
-
+			
+			
+			// get correct extrension
 			for (int i = cstart + clength; i <= sb.length() - 1; i++) {
 				if (sb.charAt(i) != '"') {
 					tmpSb.append(sb.charAt(i));
@@ -267,17 +269,12 @@ public class ExtractContent implements Const {
 					break;
 				}
 			}
-//			System.out.println("Länge von aiFiles: " + aiFiles.size()) ;
-
 			for (AIFile aif : aiFiles) {
-//				System.out.println("Demo-FileIDvor: " + aif.getFileId());
 				if (aif.getFileId().equalsIgnoreCase(tmpSb.toString())) {
 					fileExt = aif.getFileExtension();
 				}
 			}
 
-//			System.out.println("Demo-ermittelt: " + tmpSb.toString());
-//			System.out.println("Demo-FileExten: " + fileExt);
 			
 			sb.replace(cstart, cstart + clength, NEW_STRING);
 			int j = cstart + clength + NEW_STRING.length();

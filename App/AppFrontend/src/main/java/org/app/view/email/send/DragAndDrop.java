@@ -19,7 +19,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.dnd.FileDropTarget;
 import java.io.OutputStream;
 
-public class AppDragAndDrop {
+public class DragAndDrop {
 
 	public void drop() {
     final Label infoLabel = new Label();

@@ -18,6 +18,9 @@ import org.app.controler.email.imap.AIFile.FILE_TYPE;
 
 public class ExtractAttachment implements Const {
 
+	/**
+	 * Both: Attached File and Inline Image
+	 */
 	private AIFile aiFile;
 	private List<AIFile> aiFiles;
 	private Long id;
@@ -46,7 +49,6 @@ public class ExtractAttachment implements Const {
 		String inlineFileName = "";
 		String inlineFileExtension = "";
 		String inlineFileFullName = "";
-		DataSource fds = null;
 		String disposition = p.getDisposition();
 		String inlineFilePath = MAIL_INLINE_IMAGES_PATH_ABSOLUT + getId().toString() + "/";
 
@@ -57,8 +59,9 @@ public class ExtractAttachment implements Const {
 		 */
 		if (disposition.equals(Part.ATTACHMENT) && (!p.getFileName().isEmpty())) {
 			attachedFileName = p.getFileName();
-			attachedFileExtension = extractContentType(mimeBodyPart.getContentType().toLowerCase());
-			attachedFileFullName = attachedFilePath + attachedFileName + attachedFileExtension;
+//			attachedFileExtension = extractContentType(mimeBodyPart.getContentType().toLowerCase());
+//			attachedFileFullName = attachedFilePath + attachedFileName + attachedFileExtension;
+			attachedFileFullName = attachedFilePath + attachedFileName;
 
 			File directory = new File(attachedFilePath);
 			if (!directory.exists()) {
@@ -66,11 +69,6 @@ public class ExtractAttachment implements Const {
 			}
 
 			File file = new File(attachedFileFullName);
-//			System.out.println("$$$ 1bbb) Attachment-Standard - Filename: " + attachedFileName);
-//			System.out.println("$$$ FileAbsolutPath: " + file.getAbsolutePath());
-//			System.out.println("$$$ FileAbsolutPath: " + file.getAbsoluteFile());
-//			System.out.println("$$$ FileCanonicalPath: " + file.getCanonicalPath());
-//			System.out.println("$$$ FileCanonicalFile: " + file.getCanonicalFile());
 
 			InputStream is = p.getInputStream();
 			FileOutputStream fos = new FileOutputStream(file);
@@ -116,9 +114,7 @@ public class ExtractAttachment implements Const {
 				inlineIsAttachment = true;
 			}
 
-			fds = new FileDataSource(inlineFileFullName);
 			File file = new File(inlineFileFullName);
-
 			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 			com.sun.mail.util.BASE64DecoderStream test = (com.sun.mail.util.BASE64DecoderStream) mimeBodyPart
 					.getContent();

@@ -1,6 +1,7 @@
 package org.app.view.email.inbox;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -14,6 +15,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
@@ -31,6 +34,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.app.controler.EmailService;
 import org.app.controler.email.Const;
+import org.app.controler.email.Imap;
 import org.app.controler.email.Const.ESECURITY;
 import org.app.controler.email.imap.ExtractContent;
 import org.app.helper.I18n;
@@ -40,27 +44,35 @@ import org.app.view.email.EmailView;
 import com.google.common.base.Strings;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
-public class InboxSubject extends VerticalLayout implements View, Const {
+public class CallMail extends VerticalLayout implements View, Const {
 
-	private InboxMessagePlainText inboxMessage;
+	private HtmlTextMail inboxMessage;
 	private Grid<Pmail> grid;
 	private ListDataProvider<Pmail> dataProvider;
 	private Set<Pmail> selectedMails;
 	private Pmail selectedMail;
 
-	public InboxSubject(EmailView emailView) {
-		inboxMessage = new InboxMessagePlainText();
+	public CallMail(EmailView emailView) {
+		inboxMessage = new HtmlTextMail();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
 
@@ -101,29 +113,36 @@ public class InboxSubject extends VerticalLayout implements View, Const {
 						inboxMessage.getLblCC().setValue("CC " + selectedMail.getPrecipientCC());
 					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientBCC()))
 						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
-					if (selectedMail.getPnumberOfAttachments() > 0)
+
+					if (selectedMail.getPattachmentNumber() > 0) {
 						inboxMessage.getLblAttachmentNumber()
-								.setValue("Number of Attachments " + selectedMail.getPnumberOfAttachments());
-					if (!Strings.isNullOrEmpty(selectedMail.getPfilenamesOfAttachments()))
+								.setValue("Number of Attachments " + selectedMail.getPattachmentNumber());
+					}
+
+					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFileName()))
 						inboxMessage.getLblAttachmentFileNames()
-								.setValue("Filename " + selectedMail.getPfilenamesOfAttachments());
+								.setValue("Filename " + selectedMail.getPattachmentFileName());
+
+					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFilePath()))
+						inboxMessage.getLblAttachmentFilePath()
+								.setValue("Filename " + selectedMail.getPattachmentFilePath());
+
+					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFileFullName()))
+						inboxMessage.getLblAttachmentFullFileName()
+								.setValue("Filename " + selectedMail.getPattachmentFileFullName());
+
+					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFileFullName())) {
+						for (Button tmp : createAttachment(selectedMail.getPattachmentFileFullName())) {
+							inboxMessage.getAttachmentPanel().addComponent(tmp);
+						}
+					}
 
 					String tmp = I18n.decodeFromBase64(selectedMail.getPcontent());
-					tmp = parseCID(tmp, selectedMail.getPimapUid());
 					inboxMessage.setMessageContent(tmp);
-//					inboxMessage.setMessageContent(I18n.decodeFromBase64(selectedMail.getPcontent()));
 
 					byte[] byteDecodedEmail = Base64.getMimeDecoder().decode(selectedMail.getPmessage());
 					String decodedEmail = new String(byteDecodedEmail);
 					inboxMessage.setRawMail(decodedEmail);
-
-//					ExtractContent extractContent = new ExtractContent(createMessage(decodedEmail));
-
-//					inboxMessage.setRawMail(Base64.getMimeDecoder().decode(selectedMail.getPmessage()));
-
-//					inboxMessage.getLblSendDate().setValue("Sendedatum " + selectedMail.getPsendDate());
-//					String tmp = getEmailContent(selectedMail.getPmessage());
-//					inboxMessage.setMessageContent(tmp);
 
 					inboxMessage.refresh();
 				}
@@ -162,85 +181,35 @@ public class InboxSubject extends VerticalLayout implements View, Const {
 		return out;
 	}
 
-//	private String getEmailContent(String email) {
-//		String result = "";
-//		try {
-//			Properties props = System.getProperties();
-//			props.put("mail.host", "smtp.dummydomain.com");
-//			props.put("mail.transport.protocol", "smtp");
-//			Session mailSession = Session.getDefaultInstance(props, null);
-//			Message message = new MimeMessage(mailSession);
-//			message.setText(email);
-//			ExtractContent extractContent = new ExtractContent(message);
-//			result = extractContent.getEmailContent();
-//			result = parseCID(result);
-//		} catch (MessagingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return result;
-//	}
+	private List<Button> createAttachment(String in) {
+		Button downloadButton;
+		List<Button> result = new ArrayList<Button>();
 
-	private Message createMessage(String in) {
-		// replace end of line
-		String STRING1 = "\r\n"; // Linebreak Windows
-		String STRING2 = "\n"; // Linebreak Linux
-		String STRING3 = "<br>";
-		String tmp1 = in.replaceAll(STRING1, STRING2);
-		String tmp2 = tmp1.replaceAll(STRING2, STRING3);
-
-		InputStream source = null;
-		MimeMessage message = null;
-		Properties props = System.getProperties();
-		props.put("mail.host", "smtp.dummydomain.com");
-		props.put("mail.transport.protocol", "smtp");
-		Session mailSession = Session.getDefaultInstance(props, null);
-		try {
-			source = new ByteArrayInputStream(tmp2.getBytes("UTF_8"));
-			message = new MimeMessage(mailSession, source);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		String tmp1 = "\\";
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < ATTACHMENT_DELIMITER.length(); i++) {
+			sb.append(tmp1);
+			sb.append(ATTACHMENT_DELIMITER.charAt(i));
 		}
-		return message;
-	}
+		String delimiter = new String(sb);
 
-	/**
-	 * <td><img src="cid:part1.31DE7F3B.9BFBA689@gimtex.de" alt="" class=""></td>
-	 * 
-	 * @param in
-	 * @param id
-	 * @return
-	 */
+		List<String> attachments = new ArrayList<String>(Arrays.asList(in.split(delimiter)));
 
-	@SuppressWarnings("static-access")
-	private static String parseCID(String in, Long id) {
-		extractFileNameOfCid(in);
-		
-		
-		String OLD_STRING = "\"cid:";
-		String NEW_STRING = "\"./my-content/mail/images/" + id.toString() + "/";
-		Pattern pattern = Pattern.compile(OLD_STRING);
-		Matcher matcher = pattern.matcher(in);
-		in = matcher.replaceAll(matcher.quoteReplacement(NEW_STRING));
-		return in;
+		for (String str : attachments) {
+			File file = new File(str);
+			downloadButton = new Button(file.getName(), e -> {
+//				UI.getCurrent().getNavigator().navigateTo(I18n.EMAIL_VIEW);
+			});
+			downloadButton.setIcon(VaadinIcons.CLOUD_DOWNLOAD);
+			downloadButton.addStyleName("icon-align-top");
 
-	}
+			Resource res = new FileResource(file);
+			FileDownloader fd = new FileDownloader(res);
+			fd.extend(downloadButton);
+			result.add(downloadButton);
 
-	private static void extractFileNameOfCid(String in) {
-		int start = 0;
-		while (true) {
-			int found = in.indexOf("\"cid:", start);
-			System.out.println("CID found at: " + found);
-
-			if (found != -1) {
-				System.out.println("CID found at: " + found);
-				// Found one -- do whatever here
-			}
-			if (found == -1)
-				break;
-			start = found + 2; // move start up for next iteration
 		}
+		return result;
 	}
 
 }

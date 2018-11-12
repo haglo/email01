@@ -1,8 +1,5 @@
 package org.app.controler.email;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Base64;
 import java.util.Properties;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -11,33 +8,33 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
-import javax.mail.internet.MimeMessage;
 import org.app.controler.EmailService;
-import org.app.controler.email.imap.AIFile;
 import org.app.controler.email.imap.ExtractContent;
 import org.app.controler.email.imap.ExtractHeader;
-import org.app.helper.I18n;
-import org.app.model.entity.Pmail;
 
 public class Imap implements Const {
 
-	private Pmail pmail;
 	private Store store;
 	private Folder emailFolder;
 	private ExtractHeader extractHeader;
 	private ExtractContent extractContent;
+	private PersistMail persistMessage;
+	private MailServer mailServer;
 
-	public void readFromImap(EmailService service)  {
-		String tmp = "";
+	public void readFromImap(EmailService service) {
+		mailServer = new MailServer();
+		mailServer.initImap();
+		
+		
 
 		try {
 			Properties properties = new Properties();
 
-			String imapHost = "imap.gmx.net";
-			String username = "benjamin_strobel@gmx.de";
-			String password = "123atgfd";
-			Integer port = 993;
-			boolean isSSL = true;
+			String imapHost = mailServer.getImapHost();
+			String username = mailServer.getImapUsername();
+			String password = mailServer.getImapPassword();
+			Integer port = mailServer.getImapPort();
+			boolean isSSL = mailServer.isImapSSL();
 
 			properties.put("mail.imap.user", username);
 			properties.put("mail.imap.host", imapHost);
@@ -65,76 +62,9 @@ public class Imap implements Const {
 				Message message = messages[i];
 				extractHeader = new ExtractHeader(message);
 				extractContent = new ExtractContent(message, uidEmailFolder.getUID(message));
-
-				pmail = new Pmail();
-				pmail.setPimapUid(uidEmailFolder.getUID(message));
-				System.out.println("Message Count: " + i + " -- " + uidEmailFolder.getUID(message));
-
-				tmp = "";
-				for (int n = 0; n < extractHeader.getFrom().length; n++) {
-					if (n == 0) {
-						tmp = tmp + extractHeader.getFrom()[n];
-					} else {
-						tmp = tmp + ", " + extractHeader.getFrom()[n];
-					}
-				}
-				pmail.setPfrom(tmp);
-
-				pmail.setPsubject(extractHeader.getSubject());
-
-				tmp = "";
-				for (int n = 0; n < extractHeader.getTo().length; n++) {
-					if (n == 0) {
-						tmp = tmp + extractHeader.getTo()[n];
-					} else {
-						tmp = tmp + ", " + extractHeader.getTo()[n];
-					}
-				}
-				pmail.setPrecipientTO(tmp);
-
-				tmp = "";
-				for (int n = 0; n < extractHeader.getCc().length; n++) {
-					if (n == 0) {
-						tmp = tmp + extractHeader.getCc()[n];
-					} else {
-						tmp = tmp + ", " + extractHeader.getCc()[n];
-					}
-				}
-				pmail.setPrecipientCC(tmp);
-
-				tmp = "";
-				for (int n = 0; n < extractHeader.getBcc().length; n++) {
-					if (n == 0) {
-						tmp = tmp + extractHeader.getBcc()[n];
-					} else {
-						tmp = tmp + ", " + extractHeader.getBcc()[n];
-					}
-				}
-				pmail.setPrecipientBCC(tmp);
-
-				pmail.setPsendDate(extractHeader.getSendDate());
-				pmail.setPreceiveDate(extractHeader.getReceiveDate());
-
-				pmail.setPnumberOfAttachments(extractContent.getNumberOfAttachments());
-
-				tmp = "";
-				for (AIFile aif : extractContent.getAiFiles()) {
-					if (tmp.isEmpty()) {
-						tmp = tmp + aif.getFileName();
-					} else {
-						tmp = tmp + ", " + aif.getFileName();
-					}
-				}
-				pmail.setPfilenamesOfAttachments(tmp);
-				
-				pmail.setPstorageFolderOfAttachments(MAIL_ATTACHMENTS_PATH_ABSOLUT + "/" +  uidEmailFolder.getUID(message));
-
-				pmail.setPcontent(I18n.encodeToBase64(extractContent.getEmailContent()));
-
-				pmail.setPmessage(convertMessageToString((MimeMessage) message));
-
-				service.getPmailDAO().create(pmail);
-
+				persistMessage = new PersistMail();
+				persistMessage.setImapMessageID(uidEmailFolder.getUID(message));
+				persistMessage.saveImapToDatabase(message, service);
 			}
 			// close the store and folder objects
 			emailFolder.close(false);
@@ -147,21 +77,6 @@ public class Imap implements Const {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private String convertMessageToString(MimeMessage msg) {
-		String result = "";
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			msg.writeTo(out);
-			result = Base64.getMimeEncoder().encodeToString(out.toByteArray());
-		} catch (IOException | MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return result;
 	}
 
 }

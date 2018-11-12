@@ -1,5 +1,8 @@
 package org.app.view.email.inbox;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.app.helper.I18n;
 
 import com.google.common.base.Strings;
@@ -13,7 +16,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @CDIView(I18n.INBOX_MESSAGE_PLAIN_TEXT)
-public class InboxMessagePlainText extends  VerticalLayout implements View {
+public class HtmlTextMail extends  VerticalLayout implements View {
 
 	private Label lblFrom;
 	private Label lblSubject;
@@ -24,7 +27,11 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 	private Label lblSendDate;
 	private Label lblAttachmentNumber;
 	private Label lblAttachmentFileNames;
+	private Label lblAttachmentFilePath;
+	private Label lblAttachmentFullFileName;
 	
+	private List<Button> attachments;
+	private HorizontalLayout attachmentPanel;
 	private Button mailRawData;
 	private Label htmlArea;
 	
@@ -32,7 +39,7 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 	private HorizontalLayout footer;
 
 
-	public InboxMessagePlainText() {
+	public HtmlTextMail() {
 
 		lblFrom = new Label();
 		lblSubject = new Label();
@@ -43,9 +50,14 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 		lblSendDate = new Label();
 		lblAttachmentNumber = new Label();
 		lblAttachmentFileNames = new Label();
+		lblAttachmentFilePath = new Label();
+		lblAttachmentFullFileName = new Label();
 
+		attachments = new ArrayList<Button>();
+		attachmentPanel = new HorizontalLayout();
+		
 		mailRawData = new Button("QuellCode", ev -> {
-			getUI().addWindow(new InboxRawMail(getRawMail()));
+			getUI().addWindow(new RawMail(getRawMail()));
 		});
 
 		htmlArea = new Label();
@@ -62,6 +74,8 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 
 	public void init() {
 		removeAllComponents();
+		attachmentPanel.removeAllComponents();
+
 		lblFrom.setValue("");
 		lblSubject.setValue("");
 		lblReplyTo.setValue("");
@@ -94,13 +108,12 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 		if (!Strings.isNullOrEmpty(lblAttachmentFileNames.getValue()))
 			addComponent(lblAttachmentFileNames);
 
+		addComponent(attachmentPanel);
 		addComponent(mailRawData);
 		addComponent(htmlArea);
 		addComponent(footer);
 	}
 
-	public void addTextToHeader(String text) {
-	}
 
 	public Label getLblFrom() {
 		return lblFrom;
@@ -181,6 +194,32 @@ public class InboxMessagePlainText extends  VerticalLayout implements View {
 	public void setRawMail(String rawMail) {
 		this.rawMail = rawMail;
 	}
+
+	public Label getLblAttachmentFilePath() {
+		return lblAttachmentFilePath;
+	}
+
+	public void setLblAttachmentFilePath(Label lblAttachmentFilePath) {
+		this.lblAttachmentFilePath = lblAttachmentFilePath;
+	}
+
+	public Label getLblAttachmentFullFileName() {
+		return lblAttachmentFullFileName;
+	}
+
+	public void setLblAttachmentFullFileName(Label lblAttachmentFullFileName) {
+		this.lblAttachmentFullFileName = lblAttachmentFullFileName;
+	}
+
+	public HorizontalLayout getAttachmentPanel() {
+		return attachmentPanel;
+	}
+
+	public void setAttachmentPanel(HorizontalLayout attachmentPanel) {
+		this.attachmentPanel = attachmentPanel;
+	}
+
+
 
 
 

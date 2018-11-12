@@ -6,9 +6,9 @@ import javax.inject.Inject;
 import org.app.controler.EmailService;
 import org.app.controler.email.Const;
 import org.app.helper.I18n;
-import org.app.view.email.inbox.InboxMessagePlainText;
-import org.app.view.email.inbox.InboxSubject;
-import org.app.view.email.settings.SettingsView;
+import org.app.view.email.inbox.HtmlTextMail;
+import org.app.view.email.inbox.CallMail;
+import org.app.view.email.settings.Settings;
 
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
@@ -30,8 +30,8 @@ public class EmailView extends VerticalLayout implements View, Const {
 
 	private I18n i18n;
 	private EmailTopMenu emailTopMenu;
-	private InboxSubject inboxSubject;
-	private InboxMessagePlainText inboxMessagePlainText;
+	private CallMail inboxSubject;
+	private HtmlTextMail inboxMessagePlainText;
 	private HorizontalSplitPanel emailContent;
 	private VerticalLayout emailContentLeftBar;
 	private HorizontalSplitPanel emailContentRightBar;
@@ -51,9 +51,9 @@ public class EmailView extends VerticalLayout implements View, Const {
 		emailContent.setSplitPosition(15, Unit.PERCENTAGE);
 
 		Button inbox = new Button(i18n.EMAIL_INBOX, ev -> {
-			inboxSubject = new InboxSubject(this);
+			inboxSubject = new CallMail(this);
 			if (EMAIL_SECURITY_LEVEL == ESECURITY.PLAIN_TEXT) {
-				inboxMessagePlainText = new InboxMessagePlainText();
+				inboxMessagePlainText = new HtmlTextMail();
 				emailContentRightBar.setFirstComponent(inboxSubject);
 				emailContentRightBar.setSecondComponent(inboxMessagePlainText);
 			}

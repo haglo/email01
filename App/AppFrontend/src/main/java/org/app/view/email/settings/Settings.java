@@ -9,14 +9,14 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class SettingsView extends Window {
+public class Settings extends Window {
 
 	private I18n i18n;
 	private VerticalLayout subContent;
 	private CssLayout topBar;
 	private VerticalLayout mainContent;
 
-	public SettingsView() {
+	public Settings() {
 		i18n = new I18n();
 		subContent = new VerticalLayout();
 		this.setWidth("80%");

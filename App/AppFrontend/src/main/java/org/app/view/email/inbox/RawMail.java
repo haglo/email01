@@ -6,14 +6,14 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class InboxRawMail extends Window {
+public class RawMail extends Window {
 
 	private static final long serialVersionUID = 1L;
 	private Label origEmail;
 	
 	private Message message;
 
-	public InboxRawMail(String email) {
+	public RawMail(String email) {
     
 		this.setCaption("Quellcode der Email");
 		VerticalLayout subContent = new VerticalLayout();

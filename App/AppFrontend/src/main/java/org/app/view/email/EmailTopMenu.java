@@ -3,7 +3,7 @@ package org.app.view.email;
 import org.app.controler.EmailService;
 import org.app.controler.email.Imap;
 import org.app.helper.I18n;
-import org.app.view.email.send.SendView;
+import org.app.view.email.send.WriteMail;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
@@ -30,23 +30,23 @@ public class EmailTopMenu extends CssLayout {
 		callButton.setIcon(VaadinIcons.CLOUD_DOWNLOAD);
 		callButton.addStyleName("icon-align-top");
 
-		Button writeButton = new Button(i18n.EMAIL_WRITE, e -> getUI().addWindow(new SendView()));
+		Button writeButton = new Button(i18n.EMAIL_WRITE, e -> getUI().addWindow(new WriteMail(service)));
 		writeButton.setIcon(VaadinIcons.EDIT);
 		writeButton.addStyleName("icon-align-top");
 
-		Button answerButton = new Button(i18n.EMAIL_ANSWER, e -> getUI().addWindow(new SendView()));
+		Button answerButton = new Button(i18n.EMAIL_ANSWER, e -> getUI().addWindow(new WriteMail(service)));
 		answerButton.setIcon(VaadinIcons.ARROW_BACKWARD);
 		answerButton.addStyleName("icon-align-top");
 
-		Button forwardButton = new Button(i18n.EMAIL_FORWARD, e -> getUI().addWindow(new SendView()));
+		Button forwardButton = new Button(i18n.EMAIL_FORWARD, e -> getUI().addWindow(new WriteMail(service)));
 		forwardButton.setIcon(VaadinIcons.LEVEL_RIGHT_BOLD);
 		forwardButton.addStyleName("icon-align-top");
 
-		Button printButton = new Button(i18n.BASIC_PRINT, e -> getUI().addWindow(new SendView()));
+		Button printButton = new Button(i18n.BASIC_PRINT, e -> getUI().addWindow(new WriteMail(service)));
 		printButton.setIcon(VaadinIcons.PRINT);
 		printButton.addStyleName("icon-align-top");
 
-		Button deleteButton = new Button(i18n.BASIC_DELETE, e -> getUI().addWindow(new SendView()));
+		Button deleteButton = new Button(i18n.BASIC_DELETE, e -> getUI().addWindow(new WriteMail(service)));
 		deleteButton.setIcon(VaadinIcons.TRASH);
 		deleteButton.addStyleName("icon-align-top");
 

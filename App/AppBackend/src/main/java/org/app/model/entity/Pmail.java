@@ -54,11 +54,14 @@ public class Pmail extends Superclass implements Serializable {
 
 	private String preceiveDate;
 
-	private Integer pnumberOfAttachments;
+	private Integer pattachmentNumber;
+	private String pattachmentFilePath;
 
-	private String pfilenamesOfAttachments;
-	
-	private String pstorageFolderOfAttachments;
+	@Lob
+	private String pattachmentFileName;
+
+	@Lob
+	private String pattachmentFileFullName;
 
 	private String pflags;
 
@@ -162,28 +165,37 @@ public class Pmail extends Superclass implements Serializable {
 		this.preceiveDate = preceiveDate;
 	}
 
-	public Integer getPnumberOfAttachments() {
-		return pnumberOfAttachments;
+	public Integer getPattachmentNumber() {
+		return pattachmentNumber;
 	}
 
-	public void setPnumberOfAttachments(Integer pnumberOfAttachments) {
-		this.pnumberOfAttachments = pnumberOfAttachments;
+	public void setPattachmentNumber(Integer pattachmentNumber) {
+		this.pattachmentNumber = pattachmentNumber;
 	}
 
-	public String getPfilenamesOfAttachments() {
-		return pfilenamesOfAttachments;
+	public String getPattachmentFilePath() {
+		return pattachmentFilePath;
 	}
 
-	public void setPfilenamesOfAttachments(String pfilenamesOfAttachments) {
-		this.pfilenamesOfAttachments = pfilenamesOfAttachments;
+	public void setPattachmentFilePath(String pattachmentFilePath) {
+		this.pattachmentFilePath = pattachmentFilePath;
 	}
 
-	public String getPstorageFolderOfAttachments() {
-		return pstorageFolderOfAttachments;
+	public String getPattachmentFileName() {
+		return pattachmentFileName;
 	}
 
-	public void setPstorageFolderOfAttachments(String pstorageFolderOfAttachments) {
-		this.pstorageFolderOfAttachments = pstorageFolderOfAttachments;
+	public void setPattachmentFileName(String pattachmentFileName) {
+		this.pattachmentFileName = pattachmentFileName;
+	}
+
+
+	public String getPattachmentFileFullName() {
+		return pattachmentFileFullName;
+	}
+
+	public void setPattachmentFileFullName(String pattachmentFileFullName) {
+		this.pattachmentFileFullName = pattachmentFileFullName;
 	}
 
 	public String getPflags() {

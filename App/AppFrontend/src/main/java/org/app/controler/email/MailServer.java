@@ -4,101 +4,71 @@ import java.util.Properties;
 
 public class MailServer {
 
-	private String sender;
-	private String username;
-	private String password;
+	private String smtpSender;
+	private String smtpUsername;
+	private String smtpPassword;
 	private String smtpHost;
-	private String smtpPort;
-	private String imapHost;
-	private String imapPort;
-	private Properties properties;
+	private Integer smtpPort;
+	private boolean isSmtpSSL = true;
+	private boolean isSmtpStartTls = true;
+	private boolean isSmtpAuthentication = true;
 
-//	public void init(Mailprovider provider) {
+	private String imapSender;
+	private String imapUsername;
+	private String imapPassword;
+	private String imapHost;
+	private Integer imapPort;
+	private boolean isImapSSL = true;
+
 	public void init() {
 
-//		if (provider.GOOGLE != null) {
-//			setSender("h.g.gloeckler@gmail.com");
-//			setUsername("h.g.gloeckler@gmail.com");
-//			setPassword("1234:Atgfd");
-//			setSmtpHost("smtp.gmail.com");
-//			setSmtpPort("587");
-//			setImapHost("imap.gmail.com");
-//			setImapPort("993");
-//
-//			properties.put("mail.smtp.auth", "true");
-//			properties.put("mail.smtp.starttls.enable", "true");
-//			properties.put("mail.smtp.host", smtpHost);
-//			properties.put("mail.smtp.port", smtpPort);
-//
-//			properties.put("mail.imap.user", username);
-//			properties.put("mail.imap.host", imapHost);
-//			properties.put("mail.imap.port", imapPort);
-//			properties.put("mail.imap.ssl.enable", true);
-//			properties.put("mail.store.protocol", "imaps");
-//		}
-//		
-//		if (provider.PRIVATE != null) {
-		setSender("hans-georg.gloeckler@gimtex.de");
-		setUsername("hans-georg.gloeckler@gimtex.de");
-		setPassword("1234:Atgfd");
-		setSmtpHost("195.201.215.12");
-		setSmtpPort("587");
-		setImapHost("195.201.215.12");
-		setImapPort("143");
+	}
 
-		properties.put("mail.smtp.auth", "true");
-		properties.put("mail.smtp.starttls.enable", false);
-		properties.put("mail.smtp.host", smtpHost);
-		properties.put("mail.smtp.port", smtpPort);
-		properties.put("mail.imap.user", username);
-		properties.put("mail.imap.host", imapHost);
-		properties.put("mail.imap.port", imapPort);
-
-		properties.put("mail.imap.ssl.enable", false);
-		properties.put("mail.imap.starttls.enable", true);
-		properties.put("mail.store.protocol", "imap");
-//		}
+	public void initImap() {
+		setImapSender("benjamin_strobel@gimtex.de");
+		setImapUsername("benjamin_strobel@gmx.de");
+		setImapPassword("123atgfd");
+		setImapHost("imap.gmx.net");
+		setImapPort(993);
+		setImapSSL(true);
 
 	}
 
-	public String getSmtpPort() {
-		return smtpPort;
+	public void initSmtp() {
+		setSmtpSender("h.g.gloeckler@gmail.com");
+		setSmtpUsername("h.g.gloeckler@gmail.com");
+		setSmtpPassword("1234:Atgfd");
+		setSmtpHost("smtp.gmail.com");
+		setSmtpPort(587);
+		setSmtpSSL(true);
+		setSmtpStartTls(true);
+		setSmtpAuthentication(true);
+
 	}
 
-	public void setSmtpPort(String smtpPort) {
-		smtpPort = smtpPort;
+
+	public String getSmtpSender() {
+		return smtpSender;
 	}
 
-	public String getImapPort() {
-		return imapPort;
+	public void setSmtpSender(String smtpSender) {
+		this.smtpSender = smtpSender;
 	}
 
-	public void setImapPort(String imapPort) {
-		imapPort = imapPort;
+	public String getSmtpUsername() {
+		return smtpUsername;
 	}
 
-	public String getSender() {
-		return sender;
+	public void setSmtpUsername(String smtpUsername) {
+		this.smtpUsername = smtpUsername;
 	}
 
-	public void setSender(String sender) {
-		this.sender = sender;
+	public String getSmtpPassword() {
+		return smtpPassword;
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
+	public void setSmtpPassword(String smtpPassword) {
+		this.smtpPassword = smtpPassword;
 	}
 
 	public String getSmtpHost() {
@@ -109,6 +79,62 @@ public class MailServer {
 		this.smtpHost = smtpHost;
 	}
 
+	public Integer getSmtpPort() {
+		return smtpPort;
+	}
+
+	public void setSmtpPort(Integer smtpPort) {
+		this.smtpPort = smtpPort;
+	}
+
+	public boolean isSmtpSSL() {
+		return isSmtpSSL;
+	}
+
+	public void setSmtpSSL(boolean isSmtpSSL) {
+		this.isSmtpSSL = isSmtpSSL;
+	}
+
+	public boolean isSmtpStartTls() {
+		return isSmtpStartTls;
+	}
+
+	public void setSmtpStartTls(boolean isSmtpStartTls) {
+		this.isSmtpStartTls = isSmtpStartTls;
+	}
+
+	public boolean isSmtpAuthentication() {
+		return isSmtpAuthentication;
+	}
+
+	public void setSmtpAuthentication(boolean isSmtpAuthentication) {
+		this.isSmtpAuthentication = isSmtpAuthentication;
+	}
+
+	public String getImapSender() {
+		return imapSender;
+	}
+
+	public void setImapSender(String imapSender) {
+		this.imapSender = imapSender;
+	}
+
+	public String getImapUsername() {
+		return imapUsername;
+	}
+
+	public void setImapUsername(String imapUsername) {
+		this.imapUsername = imapUsername;
+	}
+
+	public String getImapPassword() {
+		return imapPassword;
+	}
+
+	public void setImapPassword(String imapPassword) {
+		this.imapPassword = imapPassword;
+	}
+
 	public String getImapHost() {
 		return imapHost;
 	}
@@ -117,13 +143,22 @@ public class MailServer {
 		this.imapHost = imapHost;
 	}
 
-	public Properties getProperties() {
-		return properties;
+	public Integer getImapPort() {
+		return imapPort;
 	}
 
-	public void setProperties(Properties properties) {
-		properties = properties;
+	public void setImapPort(Integer imapPort) {
+		this.imapPort = imapPort;
 	}
+
+	public boolean isImapSSL() {
+		return isImapSSL;
+	}
+
+	public void setImapSSL(boolean isImapSSL) {
+		this.isImapSSL = isImapSSL;
+	}
+
 
 	enum Mailprovider {
 		GOOGLE, GMX, PRIVATE;
