@@ -1,4 +1,4 @@
-package org.app.view.email.send;
+package org.app.view.mail.send;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

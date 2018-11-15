@@ -1,31 +1,33 @@
-package org.app.controler.email;
+package org.app.mail.common;
 
 import java.util.Properties;
 
 public class MailServer {
 
-	private String smtpSender;
 	private String smtpUsername;
 	private String smtpPassword;
+	private String smtpReplyTo;
 	private String smtpHost;
 	private Integer smtpPort;
 	private boolean isSmtpSSL = true;
 	private boolean isSmtpStartTls = true;
 	private boolean isSmtpAuthentication = true;
 
-	private String imapSender;
+	private String imapReplyTo;
 	private String imapUsername;
 	private String imapPassword;
 	private String imapHost;
 	private Integer imapPort;
 	private boolean isImapSSL = true;
 
-	public void init() {
+	public MailServer() {
+		initImap();
+		initSmtp();
 
 	}
 
-	public void initImap() {
-		setImapSender("benjamin_strobel@gimtex.de");
+	private void initImap() {
+		setImapReplyTo("benjamin_strobel@gmx.de");
 		setImapUsername("benjamin_strobel@gmx.de");
 		setImapPassword("123atgfd");
 		setImapHost("imap.gmx.net");
@@ -34,12 +36,21 @@ public class MailServer {
 
 	}
 
-	public void initSmtp() {
-		setSmtpSender("h.g.gloeckler@gmail.com");
-		setSmtpUsername("h.g.gloeckler@gmail.com");
-		setSmtpPassword("1234:Atgfd");
-		setSmtpHost("smtp.gmail.com");
-		setSmtpPort(587);
+	private void initSmtp() {
+//		setSmtpReplyTo("h.g.gloeckler@gmail.com");
+//		setSmtpUsername("h.g.gloeckler@gmail.com");
+//		setSmtpPassword("1234:Atgfd");
+//		setSmtpHost("smtp.gmail.com");
+//		setSmtpPort(587);
+//		setSmtpSSL(true);
+//		setSmtpStartTls(true);
+//		setSmtpAuthentication(true);
+		
+		setSmtpReplyTo("benjamin_strobel@gmx.de");
+		setSmtpUsername("benjamin_strobel@gmx.de");
+		setSmtpPassword("123atgfd");
+		setSmtpHost("mail.gmx.net");
+		setSmtpPort(465);
 		setSmtpSSL(true);
 		setSmtpStartTls(true);
 		setSmtpAuthentication(true);
@@ -47,13 +58,6 @@ public class MailServer {
 	}
 
 
-	public String getSmtpSender() {
-		return smtpSender;
-	}
-
-	public void setSmtpSender(String smtpSender) {
-		this.smtpSender = smtpSender;
-	}
 
 	public String getSmtpUsername() {
 		return smtpUsername;
@@ -111,14 +115,6 @@ public class MailServer {
 		this.isSmtpAuthentication = isSmtpAuthentication;
 	}
 
-	public String getImapSender() {
-		return imapSender;
-	}
-
-	public void setImapSender(String imapSender) {
-		this.imapSender = imapSender;
-	}
-
 	public String getImapUsername() {
 		return imapUsername;
 	}
@@ -157,6 +153,23 @@ public class MailServer {
 
 	public void setImapSSL(boolean isImapSSL) {
 		this.isImapSSL = isImapSSL;
+	}
+
+
+	public String getSmtpReplyTo() {
+		return smtpReplyTo;
+	}
+
+	public void setSmtpReplyTo(String smtpReplyTo) {
+		this.smtpReplyTo = smtpReplyTo;
+	}
+
+	public String getImapReplyTo() {
+		return imapReplyTo;
+	}
+
+	public void setImapReplyTo(String imapReplyTo) {
+		this.imapReplyTo = imapReplyTo;
 	}
 
 

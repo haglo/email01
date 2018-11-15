@@ -1,4 +1,4 @@
-package org.app.controler.email.imap;
+package org.app.mail.common;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -12,8 +12,8 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
-import org.app.controler.email.Const;
-import org.app.controler.email.imap.AIFile.FILE_TYPE;
+
+import org.app.mail.common.AIFile.FILE_TYPE;
 
 public class ExtractContent implements Const {
 	private List<AIFile> aiFiles;

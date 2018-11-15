@@ -11,7 +11,7 @@ import javax.mail.internet.MimeUtility;
 public final class I18n {
 
 	public static final String HELP_VIEW = "Help";
-	public static final String EMAIL_VIEW = "Email";
+	public static final String MAIL_MAIN_VIEW = "Email";
 	public static final String INBOX_MESSAGE_PLAIN_TEXT = "InboxMessagePlainText";
 	public static final String INBOX_MESSAGE_HTML_TEXT = "InboxMessageHtmlText";
 	public static final String INBOX_SUBJECT = "InboxSubject";
@@ -28,8 +28,9 @@ public final class I18n {
 	public static final String EMAIL_INBOX = "Inbox";
 	public static final String EMAIL_SENT = "Sent";
 	public static final String EMAIL_TRASH = "Trash";
-	public static final String EMAIL_ARCHIVE = "Archive";
-	public static final String EMAIL_LOST = "Lost";
+	public static final String EMAIL_ARCHIVE = "Templates";
+	public static final String EMAIL_TEMPLATE = "Drafts";
+	public static final String EMAIL_DRAFT = "Archive";
 	public static final String EMAIL_SETTINGS = "Settings";
 	public static final String EMAIL_TO = "To";
 	public static final String EMAIL_CC = "CC";

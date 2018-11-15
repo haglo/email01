@@ -16,7 +16,7 @@ public class TopMainMenu extends CustomComponent {
 
 	Button helpViewButton = new Button("Help", e -> UI.getCurrent().getNavigator().navigateTo(I18n.HELP_VIEW));
 
-	Button emailViewButton = new Button("Email", e -> UI.getCurrent().getNavigator().navigateTo(I18n.EMAIL_VIEW));
+	Button emailViewButton = new Button("Email", e -> UI.getCurrent().getNavigator().navigateTo(I18n.MAIL_MAIN_VIEW));
 
 	private void setupLayout() {
 		HorizontalLayout layout = new HorizontalLayout();

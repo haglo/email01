@@ -1,4 +1,4 @@
-package org.app.view.email.inbox;
+package org.app.view.mail.raw;
 
 import javax.mail.Message;
 

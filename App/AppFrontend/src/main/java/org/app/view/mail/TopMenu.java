@@ -1,9 +1,9 @@
-package org.app.view.email;
+package org.app.view.mail;
 
 import org.app.controler.EmailService;
-import org.app.controler.email.Imap;
 import org.app.helper.I18n;
-import org.app.view.email.send.WriteMail;
+import org.app.mail.imap.Imap;
+import org.app.view.mail.send.WriteMail;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
@@ -13,19 +13,19 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EmailTopMenu extends CssLayout {
+public class TopMenu extends CssLayout {
 
 	private I18n i18n;
 	private Imap imap;
 
-	public EmailTopMenu(EmailService service) {
+	public TopMenu(EmailService service) {
 		i18n = new I18n();
 		
 		Button callButton = new Button(i18n.EMAIL_CALL,
 				e -> {
 					imap = new Imap();
 					imap.readFromImap(service);
-					UI.getCurrent().getNavigator().navigateTo(I18n.EMAIL_VIEW);
+					UI.getCurrent().getNavigator().navigateTo(I18n.MAIL_MAIN_VIEW);
 				});
 		callButton.setIcon(VaadinIcons.CLOUD_DOWNLOAD);
 		callButton.addStyleName("icon-align-top");

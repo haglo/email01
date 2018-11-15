@@ -1,4 +1,4 @@
-package org.app.controler.email;
+package org.app.mail.smtp;
 
 import java.util.Properties;
 import javax.activation.DataHandler;
@@ -14,8 +14,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.app.controler.EmailService;
-import org.app.controler.email.imap.AIFile;
-import org.app.controler.email.smtp.MailOut;
+import org.app.mail.common.AIFile;
+import org.app.mail.common.MailServer;
 
 public class Smtp {
 
@@ -25,7 +25,6 @@ public class Smtp {
 	public Smtp() {
 		
 		mailServer = new MailServer();
-		mailServer.initSmtp();
 
 
 		String host = mailServer.getSmtpHost();
@@ -43,7 +42,10 @@ public class Smtp {
 		props.put("mail.smtp.host", host);
 		props.put("mail.smtp.port", port);
 		props.put("mail.smtp.auth", isSmtpAuth);
+		props.put("mail.smtp.ssl.enable", isSSL);
 		props.put("mail.smtp.starttls.enable", isStartTls);
+//		props.put("mail.transport.protocol", "smtp");
+
 
 		// Get the Session object.
 		this.session = Session.getInstance(props, new javax.mail.Authenticator() {
@@ -51,6 +53,7 @@ public class Smtp {
 				return new PasswordAuthentication(username, password);
 			}
 		});
+//		session.setDebug(true);
 
 	}
 

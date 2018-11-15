@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
@@ -25,16 +26,32 @@ import org.app.model.entity.enums.EmailFolder;
 
 @Entity
 @SuppressWarnings("all")
-@NamedQuery(name = Pmail.QUERY_GET_ALL, query = "SELECT c FROM Pmail c")
+
+@NamedQueries({ 
+	@NamedQuery(name = Pmail.QUERY_FIND_ALL, query = "SELECT c FROM Pmail c"),
+	@NamedQuery(name = Pmail.QUERY_FIND_BY_FOLDERNAME, query = "SELECT c FROM Pmail c WHERE c.pmailFolder01 =  :pmailFolder01"),
+	@NamedQuery(name = Pmail.QUERY_FIND_BY_IMAPID, query = "SELECT c FROM Pmail c WHERE c.pimapID =  :pimapID"),
+	@NamedQuery(name = Pmail.QUERY_FIND_BY_MESSAGEID, query = "SELECT c FROM Pmail c WHERE c.pmessageID =  :pmessageID")
+})
 public class Pmail extends Superclass implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	public static final String QUERY_GET_ALL = "Pmail.GetAll";
+	public static final String QUERY_FIND_ALL = "Pmail.FindAll";
+	public static final String QUERY_FIND_BY_FOLDERNAME = "Pmail.FindByFolderName";
+	public static final String QUERY_FIND_BY_IMAPID = "Pmail.FindByImapID";
+	public static final String QUERY_FIND_BY_MESSAGEID = "Pmail.FindByMessageID";
 
-	private Long pimapUid;
+	private Long pimapID;
 
-	private String pmessagID;
-
+	private String pmessageID;
+	
+	/**
+	 * Einbinden: Entity FolderName
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "FOLDER01_ID")
+	private PmailFolder01 pmailFolder01;
+	
 	private String preplyToID;
 
 	private String pfrom;
@@ -55,6 +72,7 @@ public class Pmail extends Superclass implements Serializable {
 	private String preceiveDate;
 
 	private Integer pattachmentNumber;
+
 	private String pattachmentFilePath;
 
 	@Lob
@@ -67,11 +85,6 @@ public class Pmail extends Superclass implements Serializable {
 
 	private String plabels;
 
-	/**
-	 * Einbinden: Enum EmailFolder über ComboBox
-	 */
-	@Enumerated(EnumType.STRING)
-	private EmailFolder emailFolder;
 
 	/**
 	 * content of Email
@@ -85,20 +98,29 @@ public class Pmail extends Superclass implements Serializable {
 	@Lob
 	private String pmessage;
 
-	public Long getPimapUid() {
-		return pimapUid;
+
+	public Long getPimapID() {
+		return pimapID;
 	}
 
-	public void setPimapUid(Long pimapUid) {
-		this.pimapUid = pimapUid;
+	public void setPimapID(Long pimapID) {
+		this.pimapID = pimapID;
 	}
 
-	public String getPmessagID() {
-		return pmessagID;
+	public String getPmessageID() {
+		return pmessageID;
 	}
 
-	public void setPmessagID(String pmessagID) {
-		this.pmessagID = pmessagID;
+	public void setPmessageID(String pmessageID) {
+		this.pmessageID = pmessageID;
+	}
+
+	public PmailFolder01 getPmailFolder01() {
+		return pmailFolder01;
+	}
+
+	public void setPmailFolder01(PmailFolder01 pmailFolder01) {
+		this.pmailFolder01 = pmailFolder01;
 	}
 
 	public String getPreplyToID() {
@@ -212,14 +234,6 @@ public class Pmail extends Superclass implements Serializable {
 
 	public void setPlabels(String plabels) {
 		this.plabels = plabels;
-	}
-
-	public EmailFolder getEmailFolder() {
-		return emailFolder;
-	}
-
-	public void setEmailFolder(EmailFolder emailFolder) {
-		this.emailFolder = emailFolder;
 	}
 
 	public String getPcontent() {

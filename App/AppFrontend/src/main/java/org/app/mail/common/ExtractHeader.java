@@ -1,4 +1,4 @@
-package org.app.controler.email.imap;
+package org.app.mail.common;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

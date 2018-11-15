@@ -1,5 +1,6 @@
-package org.app.controler.email.smtp;
+package org.app.mail.smtp;
 
+import java.util.Properties;
 import java.util.Set;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -11,11 +12,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.app.controler.email.imap.AIFile;
+import org.app.mail.common.AIFile;
 
 public class MailOut {
 
-	private String smtpMesssageID;
+	private String messsageID;
 	private String inReplyToID;
 	private String from;
 	private String subject;
@@ -29,18 +30,27 @@ public class MailOut {
 
 	private Session session;
 
+	public MailOut() {
+		setMesssageID(createSmtpMessageID());
+//		setMesssageID(createSmtpMessageID(session));
+	}
+
 	public MailOut(Session session) {
 		setSession(session);
-		setSmtpMesssageID(createSmtpMessageID(session));
+		setMesssageID(createSmtpMessageID());
+//		setMesssageID(createSmtpMessageID(session));
 	}
 
-	public String getSmtpMesssageID() {
-		return smtpMesssageID;
+
+	public String getMesssageID() {
+		return messsageID;
 	}
 
-	public void setSmtpMesssageID(String smtpMesssageID) {
-		this.smtpMesssageID = smtpMesssageID;
+
+	public void setMesssageID(String messsageID) {
+		this.messsageID = messsageID;
 	}
+
 
 	public String getInReplyToID() {
 		return inReplyToID;
@@ -130,9 +140,33 @@ public class MailOut {
 		this.session = session;
 	}
 
-	private String createSmtpMessageID(Session sess) {
+//	private String createSmtpMessageID(Session sess) {
+//		try {
+//			MimeMessage msg = new MimeMessage(sess) {
+//				protected void updateMessageID() throws MessagingException {
+//					if (getHeader("Message-ID") == null)
+//						super.updateMessageID();
+//				}
+//			};
+//			msg.saveChanges();
+//			return msg.getMessageID();
+//		} catch (MessagingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
+
+	private String createSmtpMessageID() {
+
+		Properties props = System.getProperties();
+		//props.put("mail.host", "smtp.dummydomain.com");
+		props.put("mail.host", "localhost");
+		props.put("mail.transport.protocol", "smtp");
+		Session session = Session.getDefaultInstance(props, null);		
+		
 		try {
-			MimeMessage msg = new MimeMessage(sess) {
+			MimeMessage msg = new MimeMessage(session) {
 				protected void updateMessageID() throws MessagingException {
 					if (getHeader("Message-ID") == null)
 						super.updateMessageID();
@@ -187,7 +221,7 @@ public class MailOut {
 
 			mimeMessage.setContent(multipart);
 			mimeMessage.saveChanges();
-			mimeMessage.setHeader("Message-ID", getSmtpMesssageID());
+			mimeMessage.setHeader("Message-ID", getMesssageID());
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}

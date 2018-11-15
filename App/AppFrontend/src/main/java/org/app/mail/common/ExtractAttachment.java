@@ -1,4 +1,4 @@
-package org.app.controler.email.imap;
+package org.app.mail.common;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -13,8 +13,8 @@ import javax.activation.FileDataSource;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
-import org.app.controler.email.Const;
-import org.app.controler.email.imap.AIFile.FILE_TYPE;
+
+import org.app.mail.common.AIFile.FILE_TYPE;
 
 public class ExtractAttachment implements Const {
 

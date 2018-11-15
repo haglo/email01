@@ -1,4 +1,4 @@
-package org.app.view.email.send;
+package org.app.view.mail.send;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -6,9 +6,9 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.app.controler.email.Const;
-import org.app.controler.email.imap.AIFile;
-import org.app.controler.email.imap.AIFile.FILE_TYPE;
+import org.app.mail.common.AIFile;
+import org.app.mail.common.Const;
+import org.app.mail.common.AIFile.FILE_TYPE;
 
 import com.vaadin.server.Page;
 import com.vaadin.ui.Component;

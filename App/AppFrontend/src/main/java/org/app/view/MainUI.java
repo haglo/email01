@@ -6,8 +6,9 @@ import javax.inject.Inject;
 
 import org.app.controler.EmailService;
 import org.app.helper.I18n;
-import org.app.view.email.EmailView;
 import org.app.view.help.HelpView;
+import org.app.view.mail.MainView;
+
 import com.vaadin.annotations.Theme;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.CDIViewProvider;

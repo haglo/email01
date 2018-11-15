@@ -1,18 +1,35 @@
-package org.app.controler.email;
+package org.app.mail.imap;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
-import org.app.controler.EmailService;
-import org.app.controler.email.imap.ExtractContent;
-import org.app.controler.email.imap.ExtractHeader;
+import javax.mail.internet.MimeMessage;
 
+import org.app.controler.EmailService;
+import org.app.mail.common.Const;
+import org.app.mail.common.ExtractContent;
+import org.app.mail.common.ExtractHeader;
+import org.app.mail.common.MailServer;
+import org.app.mail.common.PersistMail;
+import org.app.mail.common.PersistMail.MAIL_TYPE;
+import org.app.model.entity.Pmail;
+
+@Default
 public class Imap implements Const {
+
+	@Inject
+	EmailService service;
 
 	private Store store;
 	private Folder emailFolder;
@@ -23,9 +40,6 @@ public class Imap implements Const {
 
 	public void readFromImap(EmailService service) {
 		mailServer = new MailServer();
-		mailServer.initImap();
-		
-		
 
 		try {
 			Properties properties = new Properties();
@@ -54,17 +68,25 @@ public class Imap implements Const {
 			emailFolder.open(Folder.READ_ONLY);
 			UIDFolder uidEmailFolder = (UIDFolder) emailFolder;
 
-			// retrieve the messages from the folder in an array and print it
+			// retrieve the messages from the folder in an array
 			Message[] messages = emailFolder.getMessages();
 
+			List<Pmail> pmails = service.getPmailDAO().findAll();
+			List<Long> list = new ArrayList<Long>();
+			for (Pmail mail : pmails) {
+				list.add(mail.getPimapID());
+			}
+
 			for (int i = 0; i < messages.length; i++) {
-				System.out.println("Message: " + i);
 				Message message = messages[i];
+				if (list.contains(uidEmailFolder.getUID(message))) {
+					continue;
+				}
 				extractHeader = new ExtractHeader(message);
 				extractContent = new ExtractContent(message, uidEmailFolder.getUID(message));
 				persistMessage = new PersistMail();
-				persistMessage.setImapMessageID(uidEmailFolder.getUID(message));
-				persistMessage.saveImapToDatabase(message, service);
+				persistMessage.setImapID(uidEmailFolder.getUID(message));
+				persistMessage.saveMail(message, service, MAIL_TYPE.IMAP);
 			}
 			// close the store and folder objects
 			emailFolder.close(false);

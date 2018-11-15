@@ -1,8 +1,9 @@
-package org.app.controler.email;
+package org.app.mail.common;
 
 public interface Const {
 	
 	public final String ATTACHMENT_DELIMITER = "|$||$|";
+	public final String FOLDER_DELIMITER = "|$||$|";
 
 	public final ESECURITY EMAIL_SECURITY_LEVEL = ESECURITY.PLAIN_TEXT;
 

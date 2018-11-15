@@ -1,9 +1,10 @@
-package org.app.view.email.inbox;
+package org.app.view.mail;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.app.helper.I18n;
+import org.app.view.mail.raw.RawMail;
 
 import com.google.common.base.Strings;
 import com.vaadin.cdi.CDIView;
@@ -16,7 +17,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @CDIView(I18n.INBOX_MESSAGE_PLAIN_TEXT)
-public class HtmlTextMail extends  VerticalLayout implements View {
+public class DetailView extends  VerticalLayout implements View {
 
 	private Label lblFrom;
 	private Label lblSubject;
@@ -39,7 +40,7 @@ public class HtmlTextMail extends  VerticalLayout implements View {
 	private HorizontalLayout footer;
 
 
-	public HtmlTextMail() {
+	public DetailView() {
 
 		lblFrom = new Label();
 		lblSubject = new Label();

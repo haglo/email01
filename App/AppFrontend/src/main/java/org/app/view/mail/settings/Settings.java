@@ -1,4 +1,4 @@
-package org.app.view.email.settings;
+package org.app.view.mail.settings;
 
 import org.app.helper.I18n;
 import com.vaadin.icons.VaadinIcons;

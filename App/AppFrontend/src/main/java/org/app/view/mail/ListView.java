@@ -1,45 +1,20 @@
-package org.app.view.email.inbox;
+package org.app.view.mail;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
-
-import org.app.controler.EmailService;
-import org.app.controler.email.Const;
-import org.app.controler.email.Imap;
-import org.app.controler.email.Const.ESECURITY;
-import org.app.controler.email.imap.ExtractContent;
 import org.app.helper.I18n;
+import org.app.mail.common.Const;
 import org.app.model.entity.Pmail;
-import org.app.view.email.EmailView;
+import org.app.model.entity.PmailFolder01;
 
 import com.google.common.base.Strings;
 import com.vaadin.data.provider.DataProvider;
@@ -53,30 +28,25 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
-public class CallMail extends VerticalLayout implements View, Const {
+public class ListView extends VerticalLayout implements View, Const {
 
-	private HtmlTextMail inboxMessage;
+	private DetailView detailView;
 	private Grid<Pmail> grid;
 	private ListDataProvider<Pmail> dataProvider;
 	private Set<Pmail> selectedMails;
 	private Pmail selectedMail;
 
-	public CallMail(EmailView emailView) {
-		inboxMessage = new HtmlTextMail();
+	public ListView(MainView emailView, PmailFolder01 folderName) {
+		detailView = new DetailView();
 		setMargin(new MarginInfo(false, true, false, false));
 		setSizeFull();
 
-		List<Pmail> list = emailView.getEmailService().getPmailDAO().findAll();
+		List<Pmail> list = emailView.getEmailService().getPmailDAO().findByFolderName(folderName);
 		dataProvider = DataProvider.ofCollection(list);
 
 		grid = new Grid<Pmail>();
@@ -97,58 +67,58 @@ public class CallMail extends VerticalLayout implements View, Const {
 			selectedMails = new HashSet<Pmail>();
 			selectedMails = event.getAllSelectedItems();
 			if (selectedMails.size() != 1) {
-				inboxMessage.setMessageContent("");
-				inboxMessage.init();
+				detailView.setMessageContent("");
+				detailView.init();
 			} else {
 				selectedMail = getSelectedMail(selectedMails);
 				if (selectedMail != null) {
-					inboxMessage.init();
+					detailView.init();
 					if (!Strings.isNullOrEmpty(selectedMail.getPfrom()))
-						inboxMessage.getLblFrom().setValue("Von " + selectedMail.getPfrom());
+						detailView.getLblFrom().setValue("Von " + selectedMail.getPfrom());
 					if (!Strings.isNullOrEmpty(selectedMail.getPsubject()))
-						inboxMessage.getLblSubject().setValue("Betreff " + selectedMail.getPsubject());
+						detailView.getLblSubject().setValue("Betreff " + selectedMail.getPsubject());
 					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientTO()))
-						inboxMessage.getLblTO().setValue("An " + selectedMail.getPrecipientTO());
+						detailView.getLblTO().setValue("An " + selectedMail.getPrecipientTO());
 					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientCC()))
-						inboxMessage.getLblCC().setValue("CC " + selectedMail.getPrecipientCC());
+						detailView.getLblCC().setValue("CC " + selectedMail.getPrecipientCC());
 					if (!Strings.isNullOrEmpty(selectedMail.getPrecipientBCC()))
-						inboxMessage.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
+						detailView.getLblBCC().setValue("BCC " + selectedMail.getPrecipientBCC());
 
 					if (selectedMail.getPattachmentNumber() > 0) {
-						inboxMessage.getLblAttachmentNumber()
+						detailView.getLblAttachmentNumber()
 								.setValue("Number of Attachments " + selectedMail.getPattachmentNumber());
 					}
 
 					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFileName()))
-						inboxMessage.getLblAttachmentFileNames()
-								.setValue("Filename " + selectedMail.getPattachmentFileName());
+						detailView.getLblAttachmentFileNames()
+								.setValue("Filename1 " + selectedMail.getPattachmentFileName());
 
 					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFilePath()))
-						inboxMessage.getLblAttachmentFilePath()
-								.setValue("Filename " + selectedMail.getPattachmentFilePath());
+						detailView.getLblAttachmentFilePath()
+								.setValue("Filename2 " + selectedMail.getPattachmentFilePath());
 
 					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFileFullName()))
-						inboxMessage.getLblAttachmentFullFileName()
-								.setValue("Filename " + selectedMail.getPattachmentFileFullName());
+						detailView.getLblAttachmentFullFileName()
+								.setValue("Filename3 " + selectedMail.getPattachmentFileFullName());
 
 					if (!Strings.isNullOrEmpty(selectedMail.getPattachmentFileFullName())) {
 						for (Button tmp : createAttachment(selectedMail.getPattachmentFileFullName())) {
-							inboxMessage.getAttachmentPanel().addComponent(tmp);
+							detailView.getAttachmentPanel().addComponent(tmp);
 						}
 					}
 
 					String tmp = I18n.decodeFromBase64(selectedMail.getPcontent());
-					inboxMessage.setMessageContent(tmp);
+					detailView.setMessageContent(tmp);
 
 					byte[] byteDecodedEmail = Base64.getMimeDecoder().decode(selectedMail.getPmessage());
 					String decodedEmail = new String(byteDecodedEmail);
-					inboxMessage.setRawMail(decodedEmail);
+					detailView.setRawMail(decodedEmail);
 
-					inboxMessage.refresh();
+					detailView.refresh();
 				}
 			}
 			// Important
-			emailView.getEmailContentRightBar().setSecondComponent(inboxMessage);
+			emailView.getEmailContentRightBar().setSecondComponent(detailView);
 		});
 
 		addComponent(grid);
@@ -174,6 +144,9 @@ public class CallMail extends VerticalLayout implements View, Const {
 	}
 
 	private String convertTimestamp(String dateString) {
+		if (dateString.isEmpty()) {
+			return null;
+		}
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm", Locale.GERMAN);
 		ZonedDateTime dateTime = ZonedDateTime.parse(dateString, inputFormatter);
