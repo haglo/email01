@@ -83,9 +83,9 @@ public class Imap implements Const {
 					continue;
 				}
 				extractHeader = new ExtractHeader(message);
-				extractContent = new ExtractContent(message, uidEmailFolder.getUID(message));
+				extractContent = new ExtractContent(message, "" + uidEmailFolder.getUID(message));
 				persistMessage = new PersistMail();
-				persistMessage.setImapID(uidEmailFolder.getUID(message));
+				persistMessage.setImapID("" + uidEmailFolder.getUID(message));
 				persistMessage.saveMail(message, service, MAIL_TYPE.IMAP);
 			}
 			// close the store and folder objects

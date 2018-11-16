@@ -1,6 +1,5 @@
 package org.app.mail.smtp;
 
-import java.util.Properties;
 import java.util.Set;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -27,18 +26,13 @@ public class MailOut {
 	private String htmlContent;
 	private Set<AIFile> aiFiles;
 	private MimeMessage message;
-
 	private Session session;
 
 	public MailOut() {
-		setMesssageID(createSmtpMessageID());
-//		setMesssageID(createSmtpMessageID(session));
 	}
 
 	public MailOut(Session session) {
 		setSession(session);
-		setMesssageID(createSmtpMessageID());
-//		setMesssageID(createSmtpMessageID(session));
 	}
 
 
@@ -140,57 +134,13 @@ public class MailOut {
 		this.session = session;
 	}
 
-//	private String createSmtpMessageID(Session sess) {
-//		try {
-//			MimeMessage msg = new MimeMessage(sess) {
-//				protected void updateMessageID() throws MessagingException {
-//					if (getHeader("Message-ID") == null)
-//						super.updateMessageID();
-//				}
-//			};
-//			msg.saveChanges();
-//			return msg.getMessageID();
-//		} catch (MessagingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			return null;
-//		}
-//	}
-
-	private String createSmtpMessageID() {
-
-		Properties props = System.getProperties();
-		//props.put("mail.host", "smtp.dummydomain.com");
-		props.put("mail.host", "localhost");
-		props.put("mail.transport.protocol", "smtp");
-		Session session = Session.getDefaultInstance(props, null);		
-		
-		try {
-			MimeMessage msg = new MimeMessage(session) {
-				protected void updateMessageID() throws MessagingException {
-					if (getHeader("Message-ID") == null)
-						super.updateMessageID();
-				}
-			};
-			msg.saveChanges();
-			return msg.getMessageID();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private MimeMessage createMimeMessage() {
+	public MimeMessage createMimeMessage() {
 		MimeMessage mimeMessage;
 		MimeMultipart multipart = new MimeMultipart();
 		MimeBodyPart messageBodyPart = new MimeBodyPart();
 
 		try {
-			mimeMessage = new MimeMessage(getSession()) {
-				protected void updateMessageID() {
-				}
-			};
+			mimeMessage = new MimeMessage(getSession());
 			mimeMessage.setFrom(new InternetAddress(getFrom()));
 			if (this.getTo() != null && !this.getTo().trim().isEmpty())
 				mimeMessage.addRecipients(Message.RecipientType.TO, InternetAddress.parse(this.getTo(), true));
@@ -214,19 +164,21 @@ public class MailOut {
 					messageBodyPart = new MimeBodyPart();
 					messageBodyPart.setDataHandler(new DataHandler(fileDataSource));
 					messageBodyPart.setFileName(tmp.getFileName());
-					messageBodyPart.setHeader("Content-ID", "<image>");
+//					messageBodyPart.setHeader("Content-ID", "<image>");
 					multipart.addBodyPart(messageBodyPart);
 				}
 			}
 
-			mimeMessage.setContent(multipart);
+			mimeMessage.setContent(multipart); 
 			mimeMessage.saveChanges();
-			mimeMessage.setHeader("Message-ID", getMesssageID());
+			messsageID = mimeMessage.getMessageID();
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
 
+//		setMessage(mimeMessage);
 		return mimeMessage;
+		
 	}
 
 }

@@ -57,10 +57,10 @@ public class Smtp {
 
 	}
 
-	public void send(MailOut mailOut) {
+	public void send(MimeMessage message) {
 		// Send message
 		try {
-			Transport.send(mailOut.getMessage());
+			Transport.send(message);
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

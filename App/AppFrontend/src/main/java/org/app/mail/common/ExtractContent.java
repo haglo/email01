@@ -34,8 +34,8 @@ public class ExtractContent implements Const {
 	private String emailContent;
 	private ExtractAttachment extractAttachment;
 
-	public ExtractContent(Part msg, Long imapID) {
-		extractAttachment = new ExtractAttachment(imapID);
+	public ExtractContent(Part msg, String pathDef) {
+		extractAttachment = new ExtractAttachment(pathDef);
 		init();
 
 		try {
@@ -68,7 +68,7 @@ public class ExtractContent implements Const {
 
 			result = result.replaceAll("\r\n", "");
 			result = result.replaceAll("\n", "");
-			result = parseCID(result, imapID);
+			result = parseCID(result, pathDef);
 
 			setEmailContent(result);
 
@@ -241,7 +241,7 @@ public class ExtractContent implements Const {
 	}
 
 	@SuppressWarnings("static-access")
-	private String parseCID(String in, Long id) {
+	private String parseCID(String in, String id) {
 
 		StringBuffer tmpSb;
 

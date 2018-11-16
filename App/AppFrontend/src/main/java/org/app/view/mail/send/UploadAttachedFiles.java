@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.app.mail.common.AIFile;
 import org.app.mail.common.Const;
@@ -29,16 +30,17 @@ public class UploadAttachedFiles extends CustomComponent implements Const {
 
 	private String uploadPath;
 	private Set<AIFile> aiFiles;
+	private UUID uuid;
 
-	
-	public UploadAttachedFiles(String uploadPath) {
+	public UploadAttachedFiles() {
+		uuid = UUID.randomUUID();
 		aiFiles = new HashSet<AIFile>();
-		setUploadPath(uploadPath);
-		VerticalLayout layout = new VerticalLayout();	
+		uploadPath = MAIL_UPLOAD_PATH_ABSOLUT + "_tmp/" + uuid.toString() + "/";
+		VerticalLayout layout = new VerticalLayout();
 		init(layout);
 		setCompositionRoot(layout);
 	}
- 
+
 	private void init(VerticalLayout layout) {
 		// BEGIN-EXAMPLE: component.upload.basic
 		// Show uploaded file in this placeholder
@@ -62,7 +64,7 @@ public class UploadAttachedFiles extends CustomComponent implements Const {
 					file = new File(uploadPath + filename);
 					fos = new FileOutputStream(file);
 				} catch (final java.io.FileNotFoundException e) {
-					new Notification("Could not open file<br/>", e.getMessage(), Notification.Type.ERROR_MESSAGE)
+					new Notification("Could not open file ", e.getMessage(), Notification.Type.ERROR_MESSAGE)
 							.show(Page.getCurrent());
 					return null;
 				}
@@ -72,13 +74,13 @@ public class UploadAttachedFiles extends CustomComponent implements Const {
 			public void uploadSucceeded(SucceededEvent event) {
 				String tmp;
 				ctr++;
-				if (ctr==1) {
+				if (ctr == 1) {
 					tmp = "Upload done: " + file.getName();
 				} else {
 					tmp = ", " + file.getName();
 				}
-				
-				success.setValue(success.getValue() +  tmp);
+
+				success.setValue(success.getValue() + tmp);
 			}
 		}
 		ImageReceiver receiver = new ImageReceiver();
@@ -114,7 +116,7 @@ public class UploadAttachedFiles extends CustomComponent implements Const {
 				}
 			}
 		});
-		
+
 		upload.addSucceededListener(event -> {
 			AIFile aiFile = new AIFile();
 			aiFile.setFileExtension(event.getMIMEType());
@@ -132,8 +134,8 @@ public class UploadAttachedFiles extends CustomComponent implements Const {
 		// Create uploads directory
 		File uploads = new File(uploadPath);
 
-		if (!uploads.exists() && !uploads.mkdir())
-			layout.addComponent(new Label("ERROR: Could not create upload dir"));
+		if (!uploads.exists() && !uploads.mkdirs())
+			layout.addComponent(new Label("ERROR: Could not create upload dir " + uploads.getAbsolutePath()));
 
 		layout.addComponent(panelContent);
 	}
@@ -152,6 +154,14 @@ public class UploadAttachedFiles extends CustomComponent implements Const {
 
 	public void setAiFiles(Set<AIFile> aiFiles) {
 		this.aiFiles = aiFiles;
+	}
+
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
 	}
 
 }

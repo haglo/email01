@@ -23,11 +23,11 @@ public class ExtractAttachment implements Const {
 	 */
 	private AIFile aiFile;
 	private List<AIFile> aiFiles;
-	private Long id;
+	private String id;
 
-	public ExtractAttachment(Long imapID) {
+	public ExtractAttachment(String pathDef) {
 		init();
-		setId(imapID);
+		setId(pathDef);
 	}
 
 	private void init() {
@@ -181,12 +181,14 @@ public class ExtractAttachment implements Const {
 		this.aiFiles = aiFiles;
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
+
+
 
 }

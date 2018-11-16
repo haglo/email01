@@ -23,6 +23,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import org.app.model.entity.enums.EmailFolder;
+import org.hibernate.annotations.Type;
 
 @Entity
 @SuppressWarnings("all")
@@ -57,12 +58,15 @@ public class Pmail extends Superclass implements Serializable {
 	private String pfrom;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String precipientTO;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String precipientCC;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String precipientBCC;
 
 	private String psubject;
@@ -76,9 +80,11 @@ public class Pmail extends Superclass implements Serializable {
 	private String pattachmentFilePath;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String pattachmentFileName;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String pattachmentFileFullName;
 
 	private String pflags;
@@ -90,12 +96,14 @@ public class Pmail extends Superclass implements Serializable {
 	 * content of Email
 	 */
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String pcontent;
 
 	/**
 	 * Original Email
 	 */
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String pmessage;
 
 
